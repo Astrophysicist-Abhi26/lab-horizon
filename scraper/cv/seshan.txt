@@ -1,0 +1,32 @@
+Research profile of Seshan Sivasankar (PhD Microbiology, Bharathiar University, 2026).
+Research content only: used by cvmatch.py to measure how close a posting is to his work.
+
+Microbiologist trained in molecular biology and genetics. Antimicrobial resistance (AMR) and
+genome analysis of pathogens that cause infectious diseases in humans. Antimicrobial resistance
+and epidemiology. Clinical microbiology, environmental microbiology (soil, water), One Health.
+
+High-risk clones of carbapenem-resistant Pseudomonas aeruginosa in India: genome and traits.
+Prevalence and characterization of carbapenem-resistant gram-negative bacteria from poultry.
+Occurrence of mcr genes and alterations in mgrB gene in intrinsic colistin-resistant
+Enterobacterales isolated from chicken meat samples. Colistin resistance, carbapenemase genes,
+multidrug-resistant and pan-drug-resistant Klebsiella pneumoniae, Enterobacterales, Pseudomonas,
+gram-negative bacteria, food-producing animals, poultry, chicken meat, food safety, zoonotic
+transmission, genomic surveillance, high-risk clones, sequence types, MLST.
+
+Evaluation of MMV Pandemic Response Box compounds to identify potent compounds against clinically
+relevant bacterial and fungal clinical isolates in vitro. Screening of MMV Pandemic Response and
+Pathogen Box compounds against pan-drug-resistant Klebsiella pneumoniae to identify potent
+inhibitory compounds. Antibacterial and antifungal drug discovery, compound screening, minimum
+inhibitory concentration, antimicrobial susceptibility testing, drug repurposing, clinical isolates.
+
+Biomass-derived fluorescent carbon quantum dots (CQD) nanotrackers, biocompatible imaging,
+zebrafish embryogenesis. Human papillomavirus and the Hippo signalling pathway in cervical cancer.
+Marine and freshwater microalgae characterisation for biofuel production.
+
+Techniques: bacterial culture and identification, microbiology (basic and advanced techniques),
+PCR, Sanger sequencing, molecular biology, genetics, whole-genome sequencing data analysis
+(quality check, assembly, annotation, visualisation), BLAST and sequence retrieval, Gene
+Expression Omnibus, gene ontology and protein-protein interaction network analysis, molecular
+docking. Hands-on wet-lab research, resource person for a PCR and Sanger sequencing workshop.
+Conference awards in microbiological research, infectious disease epidemiology and diagnostics,
+infectious diseases and antimicrobial resistance, microbiome, molecular medicine and multiomics.

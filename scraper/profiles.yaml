@@ -1,0 +1,211 @@
+# Research profiles — one shared database of positions, ranked differently per profile.
+#
+# A profile never changes what is collected or how it is tagged; it only changes the
+# ranking. The site has a profile picker; ?p=<id> in the address opens a profile
+# directly, and the "Tune" panel lets you adjust a copy of any profile in the browser.
+# The formula is documented at the top of scraper/profiles.py and mirrored in
+# docs/score.js (tests/test_profiles.py checks that both give identical scores).
+#
+# Keys
+#   label, blurb   shown in the picker
+#   interests      taxonomy node -> weight 0-100, or a level name below. A node is a field
+#                  (micro, drug, immuno, molbio, genomics, biotech, health, org, ops, life)
+#                  or a sub-field (micro.amr, ...; see scraper/taxonomy.py). The MOST SPECIFIC
+#                  node listed wins. A position with no positively weighted topic scores 0.
+#   cross_field    share of the best weight from a second field that is added
+#   kinds          bonus by position type: postdoc, fellowship, scientist, technician, faculty, other
+#   sectors        bonus by sector: academic, industry, ai-bio, public-health, nonprofit
+#   labs           bonus by lab type: wet, hybrid, dry, unknown
+#   regions        bonus by region: europe, india, north-america, asia-pacific, middle-east,
+#                  africa, latin-america, remote, unknown
+#   coding         added when the role needs substantial programming (usually negative)
+#   senior         added for senior roles (5+ years post-PhD, principal, director ...)
+#   visa           bonus by visa line: sponsors, no-sponsorship, unknown
+#   cv             points for a perfect match with the CV text in scraper/cv/<id>.txt (0-1 scaled)
+#   llm            +/- points from the optional Claude fit check (needs ANTHROPIC_API_KEY)
+#   network        organisation pattern -> bonus (lower-case, accents removed; first match counts)
+#   search         terms and places used by the "Search elsewhere" tab (LinkedIn, Google Jobs ...)
+#
+# Level names: top 100 · very_high 85 · high 70 · medium 45 · low 20 · none 0 · avoid -40
+
+default: seshan
+
+profiles:
+
+  seshan:
+    label: "Seshan — AMR & pathogen genomics, wet lab"
+    blurb: >-
+      Built from his CV: antimicrobial resistance, clinical and One Health microbiology,
+      genome analysis of pathogens and compound screening. Postdocs and bench-scientist roles
+      first, Europe first, coding-heavy roles pushed down, roles that refuse visa sponsorship
+      pushed far down.
+    interests:
+      micro: high
+      micro.amr: top
+      micro.clinical: 90
+      micro.genomics: 90
+      micro.pathogenesis: 85
+      micro.onehealth: 85
+      micro.phage: very_high
+      micro.mycoparasit: 55
+      micro.microbiome: 60
+      micro.virology: 40
+      drug: medium
+      drug.antiinfective: 95
+      drug.screening: 60
+      drug.biologics: 35
+      immuno: 35
+      immuno.vaccines: 45
+      molbio: 50
+      molbio.molecular: 65
+      molbio.cancer: 20
+      genomics: 45
+      genomics.ngs: 60
+      genomics.bioinfo: 35
+      genomics.aibio: 40
+      biotech: 30
+      biotech.automation: 45
+      biotech.synbio: 40
+      health: 50
+      health.epi: 70
+      health.global: 65
+      ops: 30
+      ops.qc: 45
+      ops.biosafety: 60
+      org: 10
+      org.dev: 20
+      life: 25
+    cross_field: 0.25
+    kinds: {postdoc: 12, fellowship: 10, scientist: 8, technician: -15, faculty: -8, other: -5}
+    sectors: {academic: 4, industry: 2, ai-bio: 8, public-health: 5, nonprofit: 5}
+    labs: {wet: 10, hybrid: 4, dry: -25, unknown: 0}
+    regions: {europe: 12, india: 4, north-america: 3, asia-pacific: 1, middle-east: 0, africa: 1,
+              latin-america: 0, remote: 0, unknown: 0}
+    coding: -20
+    senior: -12
+    visa: {sponsors: 4, no-sponsorship: -35, unknown: 0}
+    cv: 20
+    llm: 10
+    network:
+      # where his co-authors work (as far as we know; edit freely)
+      "amsterdam umc": 6
+      "munster|muenster": 6
+      "tubingen|tuebingen": 4
+    search:
+      terms: ["postdoc antimicrobial resistance", "postdoc microbiology", "postdoc infection biology",
+              "postdoc bacterial genomics", "One Health postdoc", "research scientist microbiology",
+              "microbiologist", "phage scientist", "wet lab scientist AI biology", "AMR research fellow"]
+      places: ["Europe", "Netherlands", "Germany", "Denmark", "Sweden", "Switzerland", "United Kingdom",
+               "France", "Belgium", "India"]
+
+  explore:
+    label: "Explore everything"
+    blurb: Every field weighted alike, no preferences. Sort by deadline or date to browse all.
+    interests: {micro: 50, drug: 50, immuno: 50, molbio: 50, genomics: 50, biotech: 50, health: 50,
+                org: 50, ops: 50, life: 40}
+    cross_field: 0
+    search:
+      terms: ["postdoc biology", "postdoctoral researcher life sciences", "research scientist biology"]
+      places: ["Europe", "United States", "India"]
+
+  microbiology:
+    label: "Microbiology & infection (all)"
+    blurb: All of microbiology and infection biology, academic and industry, any region.
+    interests: {micro: top, micro.general: 80, drug.antiinfective: very_high, immuno: medium, health.epi: high,
+                health.global: high, genomics.ngs: medium, molbio: low, ops.biosafety: medium, ops.qc: medium}
+    cross_field: 0.25
+    kinds: {postdoc: 8, scientist: 6, fellowship: 6, technician: -8, faculty: -4}
+    labs: {wet: 5, dry: -5}
+    search:
+      terms: ["postdoc microbiology", "infection biology postdoc", "microbiologist"]
+      places: ["Europe", "United States", "India"]
+
+  ai-wetlab:
+    label: "AI × biology — wet-lab roles"
+    blurb: >-
+      Bench roles at AI-first biology companies and AI labs that run their own wet labs
+      (Anthropic, Isomorphic, Lila, Xaira, Adaptyv, Tabula, Biohub ...). Computational roles are
+      pushed down.
+    interests: {molbio: high, molbio.molecular: very_high, molbio.biochem: very_high, molbio.cell: high,
+                drug.screening: very_high, drug.biologics: high, biotech: high, biotech.automation: top,
+                biotech.synbio: very_high, genomics.aibio: high, micro: high, micro.phage: very_high,
+                micro.amr: high, life: medium}
+    cross_field: 0.2
+    kinds: {scientist: 8, postdoc: 6, technician: -4, faculty: -10}
+    sectors: {ai-bio: 25, industry: 5, academic: -5}
+    labs: {wet: 12, hybrid: 6, dry: -25}
+    coding: -15
+    senior: -6
+    visa: {sponsors: 4, no-sponsorship: -25}
+    search:
+      terms: ["wet lab scientist AI", "research associate biology AI", "experimental biology scientist machine learning",
+              "automated lab scientist", "protein scientist AI startup"]
+      places: ["United Kingdom", "Switzerland", "United States", "Europe"]
+
+  molecular-cell:
+    label: "Molecular & cell biology"
+    blurb: Molecular biology, genetics, cell biology, biochemistry and structural biology.
+    interests: {molbio: top, immuno: medium, drug.screening: high, drug.biologics: medium, genomics.ngs: medium,
+                biotech.synbio: medium, org.dev: medium, micro: low, life: low}
+    cross_field: 0.25
+    kinds: {postdoc: 8, scientist: 6, fellowship: 6}
+    search:
+      terms: ["postdoc molecular biology", "postdoc cell biology", "postdoc biochemistry"]
+      places: ["Europe", "United States", "India"]
+
+  genomics-bioinfo:
+    label: "Genomics & bioinformatics"
+    blurb: Sequencing, microbial and human genomics, bioinformatics and computational biology (coding welcome).
+    interests: {genomics: top, micro.genomics: top, micro.microbiome: high, health.epi: medium, molbio.molecular: medium,
+                micro: low, life: low}
+    cross_field: 0.25
+    kinds: {postdoc: 8, scientist: 6, fellowship: 6}
+    labs: {dry: 5, hybrid: 5}
+    search:
+      terms: ["postdoc bioinformatics", "computational biologist", "genomic epidemiology postdoc"]
+      places: ["Europe", "United States", "India"]
+
+  immunology-vaccines:
+    label: "Immunology & vaccines"
+    blurb: Immunology, vaccines, host defence and infection immunology.
+    interests: {immuno: top, micro.pathogenesis: high, micro.virology: high, micro: medium, drug.biologics: high,
+                molbio.cell: medium, health.clinical: medium}
+    cross_field: 0.25
+    kinds: {postdoc: 8, scientist: 6, fellowship: 6}
+    search:
+      terms: ["postdoc immunology", "vaccine scientist", "infection immunology postdoc"]
+      places: ["Europe", "United States", "India"]
+
+  biotech-industry:
+    label: "Biotech & pharma industry"
+    blurb: Industry R&D, bioprocess, QC microbiology and diagnostics — scientist roles in companies.
+    interests: {biotech: top, drug: high, ops.qc: high, micro.clinical: high, micro: medium, molbio: medium,
+                genomics.ngs: medium, life: low}
+    cross_field: 0.2
+    kinds: {scientist: 10, technician: 0, postdoc: 0, faculty: -15}
+    sectors: {industry: 12, ai-bio: 12, academic: -8}
+    search:
+      terms: ["scientist microbiology industry", "QC microbiologist", "R&D scientist biotech", "assay development scientist"]
+      places: ["Europe", "United States", "India"]
+
+  public-health:
+    label: "Epidemiology & public health"
+    blurb: Epidemiology, surveillance, global and tropical health, genomic surveillance.
+    interests: {health: top, micro.genomics: very_high, micro.amr: high, micro.onehealth: high, micro: medium,
+                genomics.bioinfo: medium}
+    cross_field: 0.25
+    kinds: {postdoc: 8, scientist: 6, fellowship: 6}
+    sectors: {public-health: 12, nonprofit: 8}
+    search:
+      terms: ["postdoc epidemiology", "genomic surveillance scientist", "global health postdoc"]
+      places: ["Europe", "United States", "India"]
+
+  plant-ecology:
+    label: "Plant, ecology & evolution"
+    blurb: Plant biology, agriculture, ecology, evolution, marine biology and model organisms.
+    interests: {org: top, micro.onehealth: medium, biotech.industrial: medium, genomics: low, life: low}
+    cross_field: 0.25
+    kinds: {postdoc: 8, scientist: 6, fellowship: 6}
+    search:
+      terms: ["postdoc plant biology", "postdoc ecology", "postdoc evolution"]
+      places: ["Europe", "United States", "India"]

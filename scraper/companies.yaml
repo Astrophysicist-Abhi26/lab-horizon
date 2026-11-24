@@ -1,0 +1,62 @@
+# Lab Horizon — company job boards (AI × biology wet labs, biotech, pharma)
+#
+# Read through each board's public API (sources_ats.py). Every role a company lists is
+# fetched; only biology research roles are kept, each tagged wet / hybrid / computational.
+#
+# ats       greenhouse | lever | ashby | workable | workday
+# slug      the board name in the API URL   (workday: host, tenant, site, queries)
+# group     ai-bio (AI-first, runs or funds its own wet lab) | biotech | pharma | nonprofit | institute
+# country   ISO-2 fallback when a role names no location
+# verified  true = the board was seen live in Nov 2026. false = the company's usual board name,
+#           not yet confirmed: `python scraper/doctor.py --probe <slug>` finds the right one.
+
+companies:
+
+# ── AI labs and AI-first biology companies running wet labs ─────────────────
+  - {name: Anthropic, ats: greenhouse, slug: anthropic, group: ai-bio, verified: true,
+     note: "Bay Area wet lab confirmed Sept 2026; hires Research Scientists (Experimental Biology) and Research Associates"}
+  - {name: Isomorphic Labs, ats: greenhouse, slug: isomorphiclabs, group: ai-bio, verified: true,
+     note: "London, Lausanne, Cambridge MA; in vitro pharmacology, biologics and translational biology roles"}
+  - {name: Xaira Therapeutics, ats: greenhouse, slug: xairatherapeutics, group: ai-bio, verified: true,
+     note: "Bay Area, Seattle, London"}
+  - {name: Biohub (Chan Zuckerberg), ats: greenhouse, slug: biohub, group: ai-bio, verified: true}
+  - {name: Lila Sciences, ats: greenhouse, slug: lilasciences, group: ai-bio, verified: true,
+     note: "autonomous science platform with a Life Science Research team"}
+  - {name: Profluent, ats: greenhouse, slug: profluent, group: ai-bio, verified: true}
+  - {name: Adaptyv Bio, ats: ashby, slug: adaptyv, group: ai-bio, country: CH, verified: true,
+     note: "automated protein lab in Lausanne and London — wet-lab scientist roles in Europe"}
+  - {name: Tabula Bio, ats: ashby, slug: tabulabio, group: ai-bio, verified: true,
+     note: "AI-first phage therapeutics for hard-to-treat infections; hands-on bench roles"}
+  - {name: Latent Labs, ats: ashby, slug: latentlabs, group: ai-bio, country: GB, verified: true}
+  - {name: Axiom Bio, ats: ashby, slug: axiombio, group: ai-bio, verified: true}
+  - {name: Anthrogen, ats: ashby, slug: anthrogen, group: ai-bio, verified: true}
+  - {name: GT Biosciences, ats: ashby, slug: gt-bio, group: ai-bio, verified: true}
+  - {name: Google DeepMind, ats: greenhouse, slug: deepmind, group: ai-bio, verified: false,
+     note: "listed a London 'Biologist' role needing wet-lab pathogen experience"}
+  - {name: OpenAI, ats: ashby, slug: openai, group: ai-bio, verified: false}
+  - {name: Recursion, ats: greenhouse, slug: recursionpharmaceuticals, group: ai-bio, verified: false}
+  - {name: insitro, ats: greenhouse, slug: insitro, group: ai-bio, verified: false}
+  - {name: "Generate:Biomedicines", ats: greenhouse, slug: generatebiomedicines, group: ai-bio, verified: false}
+  - {name: Basecamp Research, ats: ashby, slug: basecampresearch, group: ai-bio, country: GB, verified: false}
+  - {name: LabGenius, ats: workable, slug: labgenius, group: ai-bio, country: GB, verified: false}
+
+# ── Biotech, research foundations and incubators ─────────────────────────────
+  - {name: Flagship Pioneering (incl. Flagship Labs startups), ats: greenhouse, slug: flagshippioneeringinc,
+     group: biotech, verified: true}
+  - {name: Convergent Research (FROs incl. E11 Bio), ats: lever, slug: convergentresearch, group: nonprofit, verified: true}
+  - {name: Natera, ats: greenhouse, slug: natera, group: biotech, verified: true}
+  - {name: Ginkgo Bioworks, ats: greenhouse, slug: ginkgobioworks, group: biotech, verified: false}
+  - {name: Arc Institute, ats: greenhouse, slug: arcinstitute, group: institute, verified: false}
+  - {name: Altos Labs, ats: greenhouse, slug: altoslabs, group: biotech, verified: false}
+
+# ── Pharma & diagnostics (Workday career sites) ─────────────────────────────
+  - {name: Novartis, ats: workday, host: novartis.wd3.myworkdayjobs.com, tenant: novartis, site: Novartis_Careers,
+     queries: [microbiology, infectious disease, antibacterial], group: pharma, verified: false}
+  - {name: AstraZeneca, ats: workday, host: astrazeneca.wd3.myworkdayjobs.com, tenant: astrazeneca, site: Careers,
+     queries: [microbiology, infection, vaccine], group: pharma, verified: false}
+  - {name: GSK, ats: workday, host: gsk.wd5.myworkdayjobs.com, tenant: gsk, site: GSKCareers,
+     queries: [microbiology, infectious disease, vaccine], group: pharma, verified: false}
+  - {name: Thermo Fisher Scientific, ats: workday, host: thermofisher.wd5.myworkdayjobs.com, tenant: thermofisher,
+     site: ThermoFisherCareers, queries: [microbiology, scientist PhD], group: pharma, verified: false}
+  - {name: Illumina, ats: workday, host: illumina.wd1.myworkdayjobs.com, tenant: illumina, site: illumina-careers,
+     queries: [microbiology, scientist], group: biotech, verified: false}

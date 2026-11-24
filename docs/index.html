@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lab Horizon — postdocs &amp; biology jobs for Seshan Sivasankar</title>
+<meta name="description" content="Postdoc positions, fellowships and biology jobs in Europe, India and worldwide, collected daily and ranked for research on antimicrobial resistance and pathogen genomics.">
+<meta name="theme-color" content="#0b5563">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="3"/>
+      <circle cx="24" cy="24" r="16" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".45"/>
+      <path d="M7 28c6-3 11-4.5 17-4.5S35 25 41 28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="18" cy="17" r="2.6" fill="currentColor"/><circle cx="27" cy="14" r="1.8" fill="currentColor"/>
+      <circle cx="31" cy="19" r="2.2" fill="currentColor" opacity=".7"/><circle cx="21" cy="33" r="1.6" fill="currentColor" opacity=".6"/>
+    </svg>
+    <div><h1>Lab Horizon</h1><p id="tagline">Postdocs, fellowships &amp; biology jobs, ranked for Seshan Sivasankar</p></div>
+  </div>
+  <div class="controls">
+    <label class="profile">Ranking <select id="profile" aria-label="Ranking profile"></select></label>
+    <button id="tune-btn" class="btn ghost" aria-expanded="false" aria-controls="tune">Tune</button>
+    <button id="theme-btn" class="btn ghost" title="Theme: automatic / light / dark" aria-label="Change theme">◐</button>
+  </div>
+  <p id="status" class="status"></p>
+  <p id="blurb" class="blurb"></p>
+</header>
+
+<div id="tune" class="tune" hidden>
+  <div class="tune-head"><b>Tune this ranking</b> <span class="muted">Saved in this browser only.</span>
+    <button class="link" id="tune-reset">Reset</button> <button class="link" id="tune-close">Close</button></div>
+  <div id="tune-body"></div>
+</div>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="positions">Positions</button>
+  <button role="tab" data-tab="tracker">Tracker <span id="tcount" class="count"></span></button>
+  <button role="tab" data-tab="fellowships">Fellowships</button>
+  <button role="tab" data-tab="search">Search elsewhere</button>
+  <button role="tab" data-tab="sources">Sources</button>
+</nav>
+
+<main>
+  <section id="view-positions" class="view">
+    <aside id="filters" class="filters" aria-label="Filters"></aside>
+    <div class="results">
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="Search title, lab, place, topic…  ( / )" aria-label="Search positions">
+        <select id="sort" aria-label="Sort by">
+          <option value="match">Best match</option><option value="deadline">Deadline soonest</option>
+          <option value="newest">Newest</option><option value="org">Organisation A–Z</option>
+        </select>
+        <button id="ftoggle" class="btn ghost" aria-controls="filters">Filters</button>
+      </div>
+      <p id="count" aria-live="polite"></p>
+      <div id="list"></div>
+      <button id="more" class="btn" hidden>Show more</button>
+    </div>
+  </section>
+
+  <section id="view-tracker" class="view" hidden>
+    <div class="tracker-head">
+      <h2>Applications</h2>
+      <p class="muted">Kept in this browser only — nothing is uploaded. Use <b>Export backup</b> to keep a copy or move it to another device.</p>
+      <div class="row">
+        <button class="btn" id="ics">Add deadlines to my calendar (.ics)</button>
+        <button class="btn ghost" id="export">Export backup</button>
+        <label class="btn ghost">Import backup <input type="file" id="import" accept="application/json,.json" hidden></label>
+      </div>
+    </div>
+    <div id="board" class="board"></div>
+    <form id="add-form" class="add">
+      <h3>Add a position by hand</h3>
+      <p class="muted">For posts seen on LinkedIn, X, mailing lists or by word of mouth. To put one on the site for everyone, open an “Add a position” issue on GitHub.</p>
+      <div class="grid2">
+        <label>Title <input name="title" required></label>
+        <label>Link <input name="url" type="url" placeholder="https://"></label>
+        <label>Organisation <input name="org"></label>
+        <label>Location <input name="location"></label>
+        <label>Deadline <input name="deadline" type="date"></label>
+        <label>Notes <input name="notes"></label>
+      </div>
+      <button class="btn" type="submit">Add to tracker</button>
+    </form>
+  </section>
+
+  <section id="view-fellowships" class="view" hidden><div id="fellowships"></div></section>
+  <section id="view-search" class="view" hidden><div id="search"></div></section>
+  <section id="view-sources" class="view" hidden><div id="sources"></div></section>
+</main>
+
+<footer>
+  <p>Lab Horizon reads public job ads every day from job boards, EURAXESS, institute notice pages and companies’
+  official job-board APIs, and respects each site’s robots.txt. Always check the details on the original advert.
+  <a id="repo-link" href="https://github.com/">How it works &amp; source code</a></p>
+</footer>
+<script src="score.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

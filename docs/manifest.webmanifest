@@ -1,0 +1,3 @@
+{"name": "Lab Horizon", "short_name": "Lab Horizon", "description": "Postdocs, fellowships and biology jobs, ranked for Seshan Sivasankar",
+ "start_url": ".", "display": "standalone", "background_color": "#f6f8f8", "theme_color": "#0b5563",
+ "icons": [{"src": "icon.svg", "sizes": "any", "type": "image/svg+xml"}]}

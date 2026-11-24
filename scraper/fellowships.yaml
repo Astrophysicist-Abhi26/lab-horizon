@@ -1,0 +1,135 @@
+# Postdoctoral fellowships and funding schemes Seshan can apply for himself (with a host lab).
+# Shown in the site's Fellowships tab next to the live funding calls collected from EURAXESS.
+#
+# Dates go stale every year: an entry carries `windows` only when the dates were checked
+# (with the date of the check). Everything else links to the official page.
+#   windows: [{label, opens, deadline, checked}]   dates as YYYY-MM-DD
+#   verified: true when the link and summary were checked
+
+fellowships:
+
+  - id: msca-pf
+    name: MSCA Postdoctoral Fellowships (European Fellowships)
+    funder: European Commission — Marie Skłodowska-Curie Actions
+    region: europe
+    url: https://marie-sklodowska-curie-actions.ec.europa.eu/funding/msca-postdoctoral-fellowships-2026
+    who: >-
+      Any nationality. PhD by the call deadline and at most 8 years of research experience after it.
+      Mobility rule: no more than 12 months in the host country in the 3 years before the deadline.
+      12–24 months at a host in an EU member state or associated country; you write the proposal with
+      the host supervisor.
+    fit: >-
+      The flagship route into a European lab. Pick the host now (an AMR / clinical microbiology group
+      in NL, DE, DK, SE, BE, FR or CH) and start the proposal well before the call opens.
+    windows:
+      - {label: "2027 call (HORIZON-MSCA-2027-PF-01)", opens: 2027-04-07, deadline: 2027-09-08,
+         checked: "2026-11, indicative dates from the MSCA Work Programme 2026–2027"}
+    verified: true
+
+  - id: embo-pf
+    name: EMBO Postdoctoral Fellowships
+    funder: EMBO
+    region: europe
+    url: https://www.embo.org/funding/fellowships-grants-and-career-support/postdoctoral-fellowships/
+    who: International mobility for postdocs in the life sciences, to or from EMBO member states. Check eligibility and deadlines on the page.
+    fit: Strong fit for molecular microbiology and infection biology projects in a European host lab.
+    verified: false
+
+  - id: hfsp-ltf
+    name: HFSP Postdoctoral Fellowships
+    funder: Human Frontier Science Program
+    region: global
+    url: https://www.hfsp.org
+    who: Postdoctoral fellowships for moving to a lab in another country, for frontier life-science research. Check the current call on the site.
+    fit: Best for an ambitious project that takes him into a new field or approach.
+    verified: false
+
+  - id: humboldt
+    name: Humboldt Research Fellowship for Postdocs
+    funder: Alexander von Humboldt Foundation
+    region: europe
+    url: https://www.humboldt-foundation.de/en/apply/sponsorship-programmes/humboldt-research-fellowship
+    who: Postdoctoral research at a host institution in Germany; any field and nationality. Check the current rules and deadlines.
+    fit: Germany has strong AMR and infection-biology groups (Helmholtz HZI/HIPS, Münster, Tübingen, Berlin).
+    verified: false
+
+  - id: embl-eipod
+    name: EMBL postdoctoral programme (incl. EIPOD)
+    funder: European Molecular Biology Laboratory
+    region: europe
+    url: https://www.embl.org/about/info/postdoctoral-programme/
+    who: EMBL postdoc positions and interdisciplinary fellowship rounds across Heidelberg, Hamburg, Grenoble, Rome, Barcelona and EBI.
+    fit: Worth watching for microbial ecology, infection and microbiome projects.
+    verified: false
+
+  - id: fems-grants
+    name: FEMS Research and Training Grants
+    funder: Federation of European Microbiological Societies
+    region: europe
+    url: https://fems-microbiology.org
+    who: Short research visits for early-career microbiologists who are members of a FEMS member society. Check membership rules.
+    fit: A low-barrier way to spend weeks in a European AMR lab and build a relationship with a future host.
+    verified: false
+
+  - id: wellcome-eca
+    name: Wellcome Early-Career Awards
+    funder: Wellcome
+    region: europe
+    url: https://wellcome.org/grant-funding/schemes/early-career-awards
+    who: Early-career researchers ready to lead their own project. Check eligibility for researchers based in India (Wellcome funds India mainly through the India Alliance).
+    fit: A stretch goal for after a first postdoc.
+    verified: false
+
+  - id: nwo-veni
+    name: NWO Talent Programme — Veni
+    funder: Dutch Research Council (NWO)
+    region: europe
+    url: https://www.nwo.nl/en
+    who: Recent PhDs (within a few years of the PhD) of any nationality, hosted by a Dutch research institution. Check the current call.
+    fit: Relevant if a Dutch host (e.g. Amsterdam UMC) backs his application.
+    verified: false
+
+  - id: india-alliance-ecf
+    name: India Alliance Early Career Fellowship
+    funder: DBT/Wellcome Trust India Alliance
+    region: india
+    url: https://www.indiaalliance.org
+    who: Early-career researchers working at an Indian host institution. Check eligibility and the call calendar.
+    fit: The strongest Indian option for an independent AMR / infection project.
+    verified: false
+
+  - id: anrf-npdf
+    name: ANRF National Post-Doctoral Fellowship (N-PDF)
+    funder: Anusandhan National Research Foundation (formerly SERB)
+    region: india
+    url: https://anrfonline.in
+    who: Recent PhDs for postdoctoral research at an Indian institution with a mentor. Check age limits and call dates.
+    fit: A reliable two-year Indian postdoc while applying abroad.
+    verified: false
+
+  - id: dbt-ra
+    name: DBT Research Associateship (DBT-RA)
+    funder: Department of Biotechnology, Government of India
+    region: india
+    url: https://rcb.res.in/DBTRA/
+    who: PhD holders in life sciences and biotechnology; positions at Indian institutes. Check the current call.
+    fit: Good match for biotechnology and microbiology projects at DBT institutes.
+    verified: false
+
+  - id: icmr-pdf
+    name: ICMR Post-Doctoral Fellowship
+    funder: Indian Council of Medical Research
+    region: india
+    url: https://www.icmr.gov.in
+    who: PhD holders in biomedical sciences for research at Indian institutions. Check the current call on the ICMR site.
+    fit: Natural fit for AMR and clinical microbiology at ICMR institutes (e.g. NIRT Chennai, NICED/NIRBI Kolkata).
+    verified: false
+
+  - id: csir-ra
+    name: CSIR Research Associateship
+    funder: Council of Scientific & Industrial Research (HRDG)
+    region: india
+    url: https://csirhrdg.res.in
+    who: PhD holders for research at CSIR labs and other Indian institutions. Check the current call.
+    fit: Good fit for CSIR-IMTECH (microbial technology) and other CSIR life-science labs.
+    verified: false

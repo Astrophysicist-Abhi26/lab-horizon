@@ -1,0 +1,212 @@
+# Lab Horizon — job boards and feeds
+#
+# One entry = one source = one line in the site's "Sources" tab.
+# Company job boards are in companies.yaml; institute notice pages in institutes.yaml.
+#
+# type
+#   rss        RSS / Atom feed. `parser` = madgex | mpg | jobrxiv | labelled | wordpress | generic
+#              (see sources_feeds.py). A URL containing {q} is fetched once per `queries` entry.
+#   euraxess   EURAXESS search pages (facets in the URL), read page by page up to max_pages
+#   links      a page listing links to job pages; `href` = regex for those links,
+#              `org_from_href` = regex whose group 1 is the employer slug
+#
+# Optional on every entry
+#   group         heading in the Sources tab
+#   country       ISO-2 code used when a posting does not say where it is
+#   kind / sector default position type / sector for this source
+#   topics + keep_untagged: true   keep postings whose text names no field (institute pages)
+#   include / exclude              regex on the title
+#   min_expected  health turns amber below this many postings
+#   verified      how / when the URL was confirmed. "no" means it follows the board's
+#                 documented pattern but was not tested live: if it fails, the Sources tab
+#                 shows it amber (not red) and `python scraper/doctor.py` tells you more.
+#   enabled: false  parked (doctor.py --all still tests it)
+
+sources:
+
+# ═══════════════════════════ EUROPE · ACADEMIC ════════════════════════════
+
+  - name: EURAXESS — biological sciences, postdoc level
+    type: euraxess
+    group: Europe · academic
+    urls:
+      - https://euraxess.ec.europa.eu/jobs/search?f%5B0%5D=job_research_field%3A38&f%5B1%5D=job_research_profile%3A448
+    max_pages: 30
+    min_expected: 40
+    verified: "2026-11 — facet ids (field 38, profile R2 = 448) read from the live search page"
+
+  - name: EURAXESS — medical sciences, postdoc level
+    type: euraxess
+    group: Europe · academic
+    urls:
+      - https://euraxess.ec.europa.eu/jobs/search?f%5B0%5D=job_research_field%3A313&f%5B1%5D=job_research_profile%3A448
+    max_pages: 25
+    min_expected: 30
+    verified: "2026-11 — facet ids (field 313, profile 448) read from the live search page"
+
+  - name: EURAXESS — AMR, microbiology & infection keywords
+    type: euraxess
+    group: Europe · academic
+    urls:
+      - https://euraxess.ec.europa.eu/jobs/search?keywords=antimicrobial%20resistance
+      - https://euraxess.ec.europa.eu/jobs/search?keywords=microbiology
+      - https://euraxess.ec.europa.eu/jobs/search?keywords=infection%20biology
+      - https://euraxess.ec.europa.eu/jobs/search?keywords=bacteriophage
+      - https://euraxess.ec.europa.eu/jobs/search?keywords=One%20Health
+    max_pages: 5
+    min_expected: 10
+    verified: "2026-11 — keywords parameter used in production by abu85/bioinfo-jobs-hub"
+
+  - name: EURAXESS — fellowships & funding (biological sciences)
+    type: euraxess
+    group: Fellowships
+    kind: fellowship
+    urls:
+      - https://euraxess.ec.europa.eu/jobs/search?f%5B0%5D=offer_type%3Afunding&f%5B1%5D=job_research_field%3A38
+    max_pages: 6
+    min_expected: 3
+    verified: "2026-11 — offer_type facet read from the live search page"
+
+  - name: Nature Careers
+    type: rss
+    parser: madgex
+    group: Europe · academic
+    url: https://www.nature.com/naturecareers/jobsrss/?keywords={q}
+    queries: [postdoc microbiology, antimicrobial resistance, infection biology, bacteriology, microbial genomics,
+              One Health, phage, postdoc molecular biology, postdoc immunology, research scientist microbiology]
+    min_expected: 20
+    verified: "2026-11 — jobsrss/?keywords= used in production by abu85/bioinfo-jobs-hub"
+
+  - name: Times Higher Education Jobs
+    type: rss
+    parser: madgex
+    group: Europe · academic
+    url: https://www.timeshighereducation.com/unijobs/jobsrss/?keywords={q}
+    queries: [microbiology, antimicrobial resistance, postdoctoral biology, infection, molecular biology]
+    min_expected: 5
+    verified: "2026-11 — feed URL pattern seen live (Harvard TagTeam hub)"
+
+  - name: Max Planck Society
+    type: rss
+    parser: mpg
+    group: Europe · academic
+    url: https://www.mpg.de/feeds/jobs.rss
+    country: DE
+    sector: academic
+    min_expected: 3
+    verified: "2026-11 — used in production by abu85/bioinfo-jobs-hub"
+
+  - name: jobs.ac.uk — biological sciences
+    type: rss
+    parser: labelled
+    group: Europe · academic
+    url: https://www.jobs.ac.uk/jobs/biological-sciences/?format=rss
+    country: GB
+    min_expected: 10
+    verified: "no — follows jobs.ac.uk's ?format=rss pattern; the page below is the fallback"
+
+  - name: jobs.ac.uk — microbiology (page)
+    type: links
+    group: Europe · academic
+    url: https://www.jobs.ac.uk/categories/microbiology
+    href: "jobs\\.ac\\.uk/job/[A-Z0-9]+/"
+    country: GB
+    min_expected: 5
+    verified: "partly — page seen live in Nov 2026 (49 microbiology jobs); job-link pattern not yet tested"
+
+  - name: Academic Positions — microbiology & infection postdocs
+    type: links
+    group: Europe · academic
+    urls:
+      - https://academicpositions.com/jobs/position/post-doc/field/microbiology
+      - https://academicpositions.com/jobs/position/post-doc/field/bacteriology
+      - https://academicpositions.com/jobs/position/post-doc/field/infectious-diseases
+      - https://academicpositions.com/jobs/position/post-doc/field/molecular-biology
+      - https://academicpositions.com/jobs/position/post-doc/field/immunology
+    href: "/ad/[^/]+/\\d{4}/[^/]+/\\d+"
+    org_from_href: "/ad/([^/]+)/"
+    kind: postdoc
+    min_expected: 10
+    verified: "partly — microbiology and bacteriology pages seen live in Nov 2026; the other three follow the same pattern"
+
+  - name: EuroScienceJobs
+    type: links
+    group: Europe · academic
+    urls:
+      - https://www.eurosciencejobs.com/job_search/category/bioinformatics
+      - https://www.eurosciencejobs.com/job_search/category/microbiology
+      - https://www.eurosciencejobs.com/job_search/category/biology
+    href: "/job_display/\\d+/"
+    min_expected: 5
+    verified: "partly — bioinformatics category used in production by abu85/bioinfo-jobs-hub; the others follow its pattern"
+
+  - name: SciLifeLab careers (Sweden)
+    type: links
+    group: Europe · academic
+    url: https://www.scilifelab.se/career/
+    href: "scilifelab\\.se/career/[^/?#]+/?$"
+    org: SciLifeLab
+    country: SE
+    min_expected: 1
+    verified: "2026-11 — used in production by abu85/bioinfo-jobs-hub"
+
+# ═══════════════════════════ GLOBAL · ACADEMIC ════════════════════════════
+
+  - name: Science Careers (AAAS)
+    type: rss
+    parser: madgex
+    group: Global · academic
+    url: https://jobs.sciencecareers.org/jobsrss/?keywords={q}
+    queries: [postdoc microbiology, antimicrobial resistance, infectious disease, bacteriology, microbial genomics,
+              postdoctoral molecular biology]
+    min_expected: 10
+    verified: "2026-11 — jobsrss feed used in production by stemedplus/stemed-jobs"
+
+  - name: Chronicle Careers — biology & life sciences
+    type: rss
+    parser: madgex
+    group: Global · academic
+    url: https://jobs.chronicle.com/jobsrss/?PositionType=73
+    min_expected: 10
+    verified: "2026-11 — PositionType=73 used in production by stemedplus/stemed-jobs"
+
+  - name: Inside Higher Ed Careers
+    type: rss
+    parser: madgex
+    group: Global · academic
+    url: https://careers.insidehighered.com/jobsrss/?keywords={q}
+    queries: [microbiology, postdoctoral biology, infectious disease]
+    min_expected: 3
+    verified: "partly — Madgex feed pattern, listed for this board in a 2023 MetaFilter thread"
+
+  - name: jobRxiv
+    type: rss
+    parser: jobrxiv
+    group: Global · academic
+    url: https://jobrxiv.org/?feed=job_feed&posts_per_page=50&search_keywords={q}
+    queries: [microbiology, antimicrobial, infection, bacteria, phage, immunology, molecular biology]
+    min_expected: 10
+    verified: "2026-11 — feed URL used in production by stemedplus/stemed-jobs"
+
+# ═══════════════════════════════ INDIA ════════════════════════════════════
+
+  - name: IndiaBioscience jobs
+    type: links
+    group: India
+    url: https://indiabioscience.org/jobs
+    href: "indiabioscience\\.org/orgs/[^/]+/jobs/[^/?#]+"
+    org_from_href: "/orgs/([^/]+)/jobs"
+    country: IN
+    topics: [life.general]
+    keep_untagged: true
+    min_expected: 5
+    verified: "partly — job pages (/orgs/<org>/jobs/<slug>) seen live in Nov 2026; the list page follows the site's pattern"
+
+  - name: Biotecnika research jobs (India)
+    type: rss
+    parser: wordpress
+    group: India
+    url: https://www.biotecnika.org/category/jobs/feed/
+    country: IN
+    min_expected: 5
+    verified: "partly — category page seen live in Nov 2026; the feed is WordPress's standard /feed/"
