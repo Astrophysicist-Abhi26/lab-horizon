@@ -11,7 +11,7 @@ pluggy==1.7.0
 pygments==2.21.0
 pytest==9.2.0
 python-dateutil==4.0.0
-pyyaml==6.0.3
+pyyaml==6.0.4
 requests==2.34.2
 soupsieve==3.0.3
 typing-extensions==4.16.0
