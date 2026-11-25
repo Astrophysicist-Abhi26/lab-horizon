@@ -25,6 +25,8 @@ import concurrent.futures as cf
 import datetime as dt
 import json
 import os
+import threading
+import queue
 import sys
 import time
 from collections import Counter
@@ -55,6 +57,8 @@ CV_FILE = os.path.join(HERE, "cv", "seshan.txt")
 
 MAX_AGE_DAYS = 75          # a posting without a deadline is dropped this long after it was posted
 MAX_JOBS = 3000
+SOURCE_DEADLINE_S = int(os.environ.get("LH_SOURCE_DEADLINE", "600"))   # a source still silent after this is skipped today
+ENRICH_BUDGET_S = 300     # seconds spent reading detail pages per run, at most
 CARRY_MAX_DAYS = 10        # a broken source keeps its last good postings this long
 SUMMARY_CHARS = 320
 DIGEST_MIN = 55            # the digest lists new postings scoring at least this (default profile)
@@ -133,22 +137,58 @@ def run_one(src):
     return src, batch, status, error, round(time.monotonic() - t0, 1)
 
 
-def run_sources(sources, prev_health, workers=8):
+def run_sources(sources, prev_health, workers=8, deadline_s=None):
+    """Run every source on a few background threads. A source that has not answered after
+    deadline_s is skipped for today (its earlier postings are carried forward) instead of holding
+    up the whole run. The threads are daemons, so a stuck one cannot block the program's exit."""
+    deadline_s = SOURCE_DEADLINE_S if deadline_s is None else deadline_s
     prev = {h["name"]: h for h in prev_health or []}
     now = dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")
     raw, health = [], []
-    with cf.ThreadPoolExecutor(max_workers=max(1, workers)) as ex:
-        for src, batch, status, error, secs in ex.map(run_one, sources):
-            p = prev.get(src.name, {})
-            ok = status in ("ok", "low")
-            health.append({
-                "name": src.name, "group": src.group, "type": src.kind, "status": status, "raw": len(batch),
-                "kept": 0, "carried": 0, "error": error, "seconds": secs,
-                "last_ok": now if ok else p.get("last_ok"),
-                "bad_since": None if ok else (p.get("bad_since") or C.today().isoformat()),
-                "previous": p.get("status"), "verified": src.verified, "verification": src.verification, "url": src.url,
-                "note": src.cfg.get("note") or ""})
-            raw.extend(batch)
+    n = len(sources)
+    results = [None] * n
+    todo, finished = queue.Queue(), queue.Queue()
+    for i in range(n):
+        todo.put(i)
+
+    def worker():
+        while True:
+            try:
+                i = todo.get_nowait()
+            except queue.Empty:
+                return
+            try:
+                finished.put((i, run_one(sources[i])))
+            except Exception as e:                                   # noqa: BLE001
+                finished.put((i, (sources[i], [], "error", str(e)[:300], 0.0)))
+
+    for _ in range(max(1, min(workers, n))):
+        threading.Thread(target=worker, daemon=True).start()
+    t_end, done = time.monotonic() + deadline_s, 0
+    while done < n and time.monotonic() < t_end:
+        try:
+            i, r = finished.get(timeout=max(0.05, min(5.0, t_end - time.monotonic())))
+        except queue.Empty:
+            continue
+        results[i] = r
+        done += 1
+        print(f"  [{done:2d}/{n}] {r[2]:8s} {r[0].name} — {len(r[1])} found in {r[4]:.0f} s", flush=True)   # progress
+    for i, r in enumerate(results):
+        if r is None:
+            results[i] = (sources[i], [], "error",
+                          f"no answer within {deadline_s / 60:.0f} min — skipped today, earlier postings kept", float(deadline_s))
+            print(f"  [ skip] timeout  {sources[i].name} — no answer after {deadline_s} s, skipped today", flush=True)
+    for src, batch, status, error, secs in results:
+        p = prev.get(src.name, {})
+        ok = status in ("ok", "low")
+        health.append({
+            "name": src.name, "group": src.group, "type": src.kind, "status": status, "raw": len(batch),
+            "kept": 0, "carried": 0, "error": error, "seconds": secs,
+            "last_ok": now if ok else p.get("last_ok"),
+            "bad_since": None if ok else (p.get("bad_since") or C.today().isoformat()),
+            "previous": p.get("status"), "verified": src.verified, "verification": src.verification, "url": src.url,
+            "note": src.cfg.get("note") or ""})
+        raw.extend(batch)
     return raw, health
 
 
@@ -286,11 +326,14 @@ def enrich(jobs):
     picked = sorted(short, key=lambda j: -j.get("_s", 0))[:ENRICH_MAX]
     fetched = failed = used = 0
     t = C.today().isoformat()
+    t_stop = time.monotonic() + ENRICH_BUDGET_S
     for j in picked:
         entry = cache.get(j["id"])
         if entry is None:
+            if time.monotonic() > t_stop:                    # out of time today: try again tomorrow
+                continue
             try:
-                entry = {"text": detail_text(j["url"]), "on": t}
+                entry = {"text": C.call_with_deadline(45, detail_text, j["url"]), "on": t}
                 fetched += 1
             except Exception:                                        # noqa: BLE001
                 entry = {"text": "", "on": t}

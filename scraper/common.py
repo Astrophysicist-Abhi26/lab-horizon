@@ -35,9 +35,40 @@ _BROWSER_HEADERS = {"User-Agent": BROWSER_UA,
                     "Accept-Language": "en-GB,en;q=0.9"}
 
 
+RETRY_AFTER_CAP = 20   # seconds; a site that says "come back in an hour" is not waited for
+
+
+class CappedRetry(Retry):
+    """urllib3's Retry obeys a server's Retry-After header for as long as it asks. Here the
+    wait is capped, so a busy site is reported as failing instead of stalling the whole run."""
+    def get_retry_after(self, response):
+        v = super().get_retry_after(response)
+        return None if v is None else min(v, RETRY_AFTER_CAP)
+
+
+def call_with_deadline(seconds, fn, *args, **kw):
+    """Run fn on a background thread and give up after `seconds` (TimeoutError). requests'
+    timeouts only cover silences, so a server that trickles bytes could otherwise last for ever."""
+    box = {}
+
+    def run():
+        try:
+            box["v"] = fn(*args, **kw)
+        except BaseException as e:                                  # noqa: BLE001
+            box["e"] = e
+    t = threading.Thread(target=run, daemon=True)
+    t.start()
+    t.join(seconds)
+    if t.is_alive():
+        raise TimeoutError(f"no answer within {seconds:.0f} s")
+    if "e" in box:
+        raise box["e"]
+    return box.get("v")
+
+
 def session():
     s = requests.Session()
-    retry = Retry(total=3, connect=1, backoff_factor=1.5,
+    retry = CappedRetry(total=3, connect=1, backoff_factor=1.5,
                   status_forcelist=(429, 500, 502, 503, 504),
                   allowed_methods=("GET", "POST"), respect_retry_after_header=True)
     adapter = HTTPAdapter(max_retries=retry, pool_maxsize=16)

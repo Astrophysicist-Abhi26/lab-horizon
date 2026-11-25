@@ -26,7 +26,7 @@ jobs:
   update:
     if: github.event_name != 'issues' || contains(github.event.issue.labels.*.name, 'add-position')
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     outputs:
       pages: ${{ steps.pages.outputs.enabled }}
     steps:

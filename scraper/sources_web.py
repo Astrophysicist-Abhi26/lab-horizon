@@ -9,6 +9,7 @@ so a redesign of the page's CSS does not break it.
 """
 
 import re
+import time
 from urllib.parse import urljoin, urlparse
 
 from bs4 import BeautifulSoup
@@ -86,10 +87,20 @@ def parse_euraxess_card(card, a, src, base="https://euraxess.ec.europa.eu"):
         fields_text=fields, profile_text=profile)
 
 
+# EURAXESS can be slow, or ask automated readers to wait. One EURAXESS source stops paging after
+# this many seconds and keeps what it has, so a slow day cannot hold up the whole run.
+EURAXESS_BUDGET_S = 480
+
+
 def fetch_euraxess(src):
     out, seen, errors = [], set(), []
+    t0, budget = time.monotonic(), float(src.get("budget_s", EURAXESS_BUDGET_S))
     for base in src["urls"]:
+        if time.monotonic() - t0 > budget:
+            break
         for page in range(int(src.get("max_pages", 20))):
+            if page and time.monotonic() - t0 > budget:
+                break
             url = base if page == 0 else base + ("&" if "?" in base else "?") + f"page={page}"
             try:
                 soup = _soup(url, src)
