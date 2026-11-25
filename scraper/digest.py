@@ -15,7 +15,7 @@ import requests
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PATH = os.path.join(ROOT, "notify", "digest.md")
 API = "https://api.github.com"
-INTRO = ("Lab Horizon posts a comment here each day with new positions that match Seshan's profile "
+INTRO = ("PetriPath posts a comment here each day with new positions that match Seshan's profile "
          "well, and with any source that stopped working.\n\n"
          "Click **Subscribe** (or *Watch → Custom → Issues*) to get these comments by e-mail.")
 

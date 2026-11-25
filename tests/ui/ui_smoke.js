@@ -15,6 +15,7 @@ const dom = new JSDOM(html, { url: "https://example.org/lab-horizon/", runScript
 const w = dom.window, d = w.document;
 w.fetch = async () => ({ ok: true, json: async () => JSON.parse(JSON.stringify(data)) });
 w.eval(fs.readFileSync(path.join(DOCS, "score.js"), "utf8"));
+w.eval(fs.readFileSync(path.join(DOCS, "bg.js"), "utf8"));
 w.eval(fs.readFileSync(path.join(DOCS, "app.js"), "utf8"));
 const tick = () => new Promise((r) => setTimeout(r, 30));
 const check = (cond, msg) => { if (!cond) { errors.push("FAIL: " + msg); } else console.log("  ok  " + msg); };
@@ -29,6 +30,14 @@ const change = (el) => el.dispatchEvent(new w.Event("change", { bubbles: true })
   check(/Sample data/.test(d.querySelector("#status").textContent), "sample banner shown for offline data");
   check(d.querySelector("#profile").options.length === data.profiles.list.length, "profile picker lists all profiles");
   check(d.querySelectorAll("#filters details.fld").length >= 5, "field filter shows fields");
+  check(/Seshan/.test(d.querySelector("#hello").textContent), "hero greets Seshan");
+  check(/Today's plate holds \d+ open positions/.test(d.querySelector("#today").textContent), "hero summarises today's plate");
+  check(d.querySelectorAll("#bg svg g").length > 10, "biology background drawn");
+  const amrDisc = d.querySelector('#discs [data-preset="amr"]');
+  check(!!amrDisc, "quick-search discs rendered");
+  click(amrDisc); await tick();
+  check(cards().length > 0 && w.location.search.includes("sub=") && amrDisc.getAttribute("aria-pressed") === "true", `AMR disc filters the list (${cards().length})`);
+  click(d.querySelector('#filters [data-act="reset"]')); await tick();
   // quick pick: wet lab only
   const wet = d.querySelector('#filters input[data-f="wet"]'); wet.checked = true; change(wet); await tick();
   check(cards().every((c) => /Wet lab|Wet \+ dry/.test(c.querySelector(".badges").textContent)), `wet-lab toggle keeps only wet/hybrid (${cards().length})`);

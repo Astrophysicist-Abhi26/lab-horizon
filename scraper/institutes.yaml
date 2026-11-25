@@ -1,4 +1,4 @@
-# Lab Horizon — institute notice pages, read by the generic extractor (sources_web.py)
+# PetriPath — institute notice pages, read by the generic extractor (sources_web.py)
 #
 # An item is kept when a link and its block (table row, list item, paragraph) look like a
 # job notice: a job word ("Project Scientist", "Research Associate", "Postdoc", "Advt") and,

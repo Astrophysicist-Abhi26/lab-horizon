@@ -1,4 +1,4 @@
-# Lab Horizon — job boards and feeds
+# PetriPath — job boards and feeds
 #
 # One entry = one source = one line in the site's "Sources" tab.
 # Company job boards are in companies.yaml; institute notice pages in institutes.yaml.

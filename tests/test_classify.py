@@ -50,3 +50,19 @@ def test_visa_refusal_wins_and_wet_cues():
     assert (j["visa"], j["lab"], j["level"]) == ("no-sponsorship", "wet", "senior")
     assert c("Biologist, DeepMind", "3 years of wet-lab experience with high-consequence pathogens. Microbiology.",
              "Google DeepMind", "London, UK", sector="ai-bio")["lab"] == "wet"
+
+
+def test_amr_needs_a_microbial_signal():
+    # the two false positives seen on the live site
+    cancer = c("Postdoctoral studies in uncovering novel therapeutic targets in MYC-driven tumors",
+               "Multidrug resistance (MDR) of cancer cells; drug-resistant tumours; resistance mechanisms.")
+    assert "micro.amr" not in cancer["topics"]
+    brain = c("Postdoctoral Researcher; Neurotropic viruses in Alzheimer's disease",
+              "Amyloid-beta may act as an antimicrobial peptide; antibiotics and antimicrobials in the brain.")
+    assert "micro.amr" not in brain["topics"] and "drug.antiinfective" not in brain["topics"]
+    kleb = c("Postdoc on multidrug-resistant Klebsiella", "MDR Klebsiella pneumoniae isolates from hospitals.")
+    assert "micro.amr" in kleb["topics"]
+    # ... but a job whose title names antimicrobials is about them, even with a thin description
+    hdar = c("Interdisciplinary Postdoctoral Fellow in Host-Directed Antimicrobial Research", "Copenhagen, Denmark")
+    assert hdar["relevant"] and "micro.amr" in hdar["topics"]
+    assert "drug.antiinfective" not in c("Research Associate in Antimicrobial Resistance Genomics", "")["topics"]

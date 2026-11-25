@@ -1,5 +1,5 @@
 """
-Shared helpers for every Lab Horizon source.
+Shared helpers for every PetriPath source.
 
 One polite HTTP session (retries, robots.txt, one request per host per second),
 a date reader that understands the formats job boards and Indian institute pages
@@ -22,8 +22,8 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 REPO = os.environ.get("GITHUB_REPOSITORY", "Astrophysicist-Abhi26/lab-horizon")
-UA = f"LabHorizon/1.0 (research-job aggregator; +https://github.com/{REPO})"
-ROBOTS_TOKEN = "LabHorizon"
+UA = f"PetriPath/1.0 (research-job aggregator; +https://github.com/{REPO})"
+ROBOTS_TOKEN = "PetriPath"
 TIMEOUT = 30
 CONNECT_TIMEOUT = 10
 HOST_GAP = float(os.environ.get("LH_HOST_GAP", "1.0"))   # seconds between two requests to one host

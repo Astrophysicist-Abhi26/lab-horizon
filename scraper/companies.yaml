@@ -1,4 +1,4 @@
-# Lab Horizon — company job boards (AI × biology wet labs, biotech, pharma)
+# PetriPath — company job boards (AI × biology wet labs, biotech, pharma)
 #
 # Read through each board's public API (sources_ats.py). Every role a company lists is
 # fetched; only biology research roles are kept, each tagged wet / hybrid / computational.

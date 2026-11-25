@@ -1,3 +1,16 @@
-{"name": "Lab Horizon", "short_name": "Lab Horizon", "description": "Postdocs, fellowships and biology jobs, ranked for Seshan Sivasankar",
- "start_url": ".", "display": "standalone", "background_color": "#f6f8f8", "theme_color": "#0b5563",
- "icons": [{"src": "icon.svg", "sizes": "any", "type": "image/svg+xml"}]}
+{
+  "name": "PetriPath",
+  "short_name": "PetriPath",
+  "description": "Postdocs, fellowships and biology jobs, ranked for Seshan Sivasankar",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#120d26",
+  "theme_color": "#120d26",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml"}
+  ]
+}

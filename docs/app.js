@@ -1,4 +1,4 @@
-/* Lab Horizon — the site. Plain JavaScript, no framework and no build step.
+/* PetriPath — the site. Plain JavaScript, no framework and no build step.
    Data: jobs.json, written daily by scraper/scrape.py. Ranking: score.js (shared with the tests).
    Everything personal (tracker, hidden posts, tuning) stays in this browser's localStorage. */
 (function () {
@@ -36,6 +36,8 @@
   const flag = (cc) => (/^[A-Z]{2}$/.test(cc || "") ? String.fromCodePoint(...[...cc].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65)) : "");
   const signed = (p) => (p > 0 ? "+" : p < 0 ? "−" : "") + Math.abs(Math.round(p));
   function download(name, text, type) {
+    // inside the Android app, files go to Downloads through the app's bridge
+    if (window.AndroidBridge && window.AndroidBridge.saveFile) { window.AndroidBridge.saveFile(name, type, text); return; }
     if (!window.URL || !URL.createObjectURL) return;
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([text], { type }));
@@ -56,7 +58,7 @@
     data: null, jobs: [], byId: new Map(), ctx: null, profiles: {}, profileId: null, prof: null,
     f: JSON.parse(JSON.stringify(DEFAULTS)), q: "", sort: "match", tab: "positions", shown: 40,
     tracker: store.get("lh.tracker", {}), hidden: new Set(store.get("lh.hidden", [])),
-    prevVisit: store.get("lh.lastVisit", null), openFields: new Set(), term: 0, place: 0,
+    prevVisit: store.get("lh.lastVisit", null), openFields: new Set(), term: 0, place: 0, preset: null,
   };
 
   function readURL() {
@@ -186,14 +188,81 @@
     const gen = d.generated ? new Date(d.generated) : null;
     const stale = gen && (Date.now() - gen.getTime()) > 2.5 * DAY;
     const ok = (d.health || []).filter((h) => h.status === "ok" || h.status === "low").length;
-    const openJobs = S.jobs.filter(open).length;
-    $("#status").innerHTML = (d.sample ? '<span class="banner">Sample data from the test fixtures — the live site updates daily</span> ' : "") +
-      `Updated ${gen ? esc(gen.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) : "—"} · ` +
-      `${openJobs} open positions · ${ok}/${(d.health || []).length} sources healthy` +
-      (stale ? ' · <span class="banner">Data is more than two days old — check the Actions tab</span>' : "");
-    $("#blurb").textContent = S.profiles[S.profileId].blurb || "";
+    $("#status").innerHTML = (d.sample ? '<span class="banner">Sample data from the test fixtures; the live site updates every morning.</span> ' : "") +
+      `Updated ${gen ? esc(gen.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })) : "recently"}. ` +
+      `${ok} of ${(d.health || []).length} sources healthy.` +
+      (stale ? ' <span class="banner">The data is more than two days old: check the Actions tab on GitHub.</span>' : "");
+    $("#blurb").innerHTML = `<span>${esc(S.profiles[S.profileId].blurb || "")}</span>`;
     const repo = (d.site || {}).repo;
-    if (repo) $("#repo-link").href = "https://github.com/" + repo;
+    if (repo) {
+      const gh = "https://github.com/" + repo;
+      const apk = gh + "/releases/latest/download/PetriPath.apk";
+      const inApp = /PetriPathApp/.test(navigator.userAgent || "");
+      $("#repo-link").href = gh;
+      $("#addpos-link").href = $("#addpos-foot").href = gh + "/issues/new?template=add-position.yml";
+      $("#appbtn").href = $("#app-link").href = apk;
+      $("#appbtn").hidden = $("#app-link").hidden = inApp;
+    }
+    renderHero();
+  }
+
+  // ── hero: greeting, today's plate, quick searches ───────────────────────
+  const PRESETS = [
+    { id: "amr", label: "AMR & infection", k: "p",
+      f: { sub: ["micro.amr", "micro.clinical", "micro.pathogenesis", "micro.phage", "micro.genomics", "drug.antiinfective"] } },
+    { id: "eu", label: "Europe, wet lab", k: "v", f: { region: ["europe"], wet: true } },
+    { id: "ai", label: "AI labs with wet benches", k: "c", f: { sector: ["ai-bio"], wet: true } },
+    { id: "in", label: "India", k: "a", f: { region: ["india"] } },
+    { id: "soon", label: "Closing within 2 weeks", k: "r", f: { deadline: "14" } },
+    { id: "new", label: "New since last visit", k: "g", f: { fresh: true } },
+  ];
+  function withFilters(f, fn) {
+    const saved = [S.f, S.q];
+    S.f = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), JSON.parse(JSON.stringify(f)));
+    S.q = "";
+    try { return fn(); } finally { S.f = saved[0]; S.q = saved[1]; }
+  }
+  const countWith = (f) => withFilters(f, () => S.jobs.filter((j) => passes(j)).length);
+  function greeting() {
+    const h = new Date().getHours();
+    if (h < 5) return "Working late, Seshan?";
+    if (h < 12) return "Good morning, Seshan.";
+    if (h < 17) return "Good afternoon, Seshan.";
+    return "Good evening, Seshan.";
+  }
+  function renderHero() {
+    $("#hello").textContent = greeting();
+    const all = countWith({}), eu = countWith({ region: ["europe"] }), india = countWith({ region: ["india"] });
+    const fresh = countWith({ fresh: true }), week = countWith({ deadline: "7" });
+    let text = `Today's plate holds ${all} open positions: ${eu} in Europe and ${india} in India.`;
+    if (fresh) text += ` ${fresh} ${fresh === 1 ? "is" : "are"} new since your last visit.`;
+    if (week) text += ` ${week} close${week === 1 ? "s" : ""} within a week.`;
+    $("#today").textContent = text;
+    $("#discs").innerHTML = PRESETS.map((p) => [p, countWith(p.f)]).filter(([, n]) => n > 0).map(([p, n]) =>
+      `<button class="disc ${p.k}" data-preset="${p.id}" aria-pressed="${S.preset === p.id}"><i aria-hidden="true"></i>${esc(p.label)} <small>${n}</small></button>`).join("");
+  }
+  function markPreset() {
+    for (const b of document.querySelectorAll("#discs .disc")) b.setAttribute("aria-pressed", String(b.dataset.preset === S.preset));
+  }
+  function applyPreset(id) {
+    const p = PRESETS.find((x) => x.id === id);
+    if (!p) return;
+    S.f = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), JSON.parse(JSON.stringify(p.f)));
+    S.q = "";
+    $("#q").value = "";
+    S.preset = id;
+    showTab("positions");
+    update();
+    const v = $("#view-positions");
+    if (v && v.scrollIntoView) v.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function fieldWeight(field) {
+    let w = 0;
+    for (const [node, v] of Object.entries((S.prof || {}).interests || {})) if (node.split(".")[0] === field && v > w) w = v;
+    return w;
+  }
+  function paintBackground(reseed) {
+    if (window.PPBackground) window.PPBackground.render({ weight: fieldWeight, reseed: !!reseed });
   }
 
   // ── filters panel ───────────────────────────────────────────────────────
@@ -270,16 +339,16 @@
     if (j.carried) badges.push('<span class="b warn">Source down today — last known</span>');
     const chips = (j.topics || []).slice(0, 4).map((s) => `<button class="chip" data-sub="${esc(s)}" title="Show only this field">${esc(subLabel(s))}</button>`).join("");
     const dl = j.deadline
-      ? `<span class="dl ${d <= 7 ? "urgent" : d <= 21 ? "soon" : ""}">Closes ${esc(fmtDate(j.deadline))} · ${d === 0 ? "today" : d + " days left"}</span>`
-      : '<span class="dl">No deadline listed</span>';
+      ? `<span class="dl ${d <= 7 ? "urgent" : d <= 21 ? "soon" : ""}">Closes ${esc(fmtDate(j.deadline))}, ${d === 0 ? "today" : d + " days left"}</span>`
+      : '<span class="dl none">No deadline listed</span>';
     const posted = j.posted ? `<span>Posted ${esc(ago(j.posted))}</span>` : j.first_seen ? `<span>Found ${esc(ago(j.first_seen))}</span>` : "";
     const reasons = (j._r || []).map((r, i) => `<li>${esc(r[0])} <span>${i === 0 ? Math.round(r[1]) : signed(r[1])}</span></li>`).join("");
     const tier = j._s >= 80 ? "hi" : j._s >= 60 ? "mid" : "lo";
-    return `<article class="job${S.hidden.has(j.id) ? " dim" : ""}" data-id="${esc(j.id)}">
+    return `<article class="job${S.hidden.has(j.id) ? " dim" : ""}" data-id="${esc(j.id)}" data-lab="${esc(j.lab || "unknown")}">
       <div class="score ${tier}" style="--s:${j._s}" title="Match for this ranking profile"><b>${j._s}</b><small>match</small></div>
       <div class="body">
         <h3><a href="${esc(j.url)}" target="_blank" rel="noopener">${esc(j.title)}</a></h3>
-        <p class="meta">${esc(j.org || "")}${j.org && where ? " · " : ""}${esc(where)} <span class="via">· via ${esc(via)}</span></p>
+        <p class="meta">${j.org ? `<span class="org">${esc(j.org)}</span>` : ""}${where ? `<span class="where">${esc(where)}</span>` : ""}<span class="via">via ${esc(via)}</span></p>
         <p class="badges">${badges.join("")}</p>
         ${chips ? `<p class="topics">${chips}</p>` : ""}
         ${j.summary ? `<p class="summary">${esc(j.summary)}</p>` : ""}
@@ -290,7 +359,7 @@
       <div class="actions">
         <button data-act="track" class="${t ? "on" : ""}">${t ? "★ " + esc(statusLabel(t.status)) : "☆ Track"}</button>
         <button data-act="hide">${S.hidden.has(j.id) ? "Unhide" : "Hide"}</button>
-        <a class="open" href="${esc(j.apply || j.url)}" target="_blank" rel="noopener">Open ↗</a>
+        <a class="open" href="${esc(j.apply || j.url)}" target="_blank" rel="noopener">Open advert</a>
       </div>
     </article>`;
   }
@@ -298,14 +367,14 @@
     const list = S.jobs.filter((j) => passes(j)).sort(SORTS[S.sort] || SORTS.match);
     const total = S.jobs.filter(open).length;
     $("#count").textContent = `${list.length} of ${total} open positions` + (S.q ? ` matching “${S.q}”` : "") +
-      ` · ranked for ${S.profiles[S.profileId].label}`;
+      `, ranked for ${S.profiles[S.profileId].label}.`;
     $("#list").innerHTML = list.length ? list.slice(0, S.shown).map(card).join("")
-      : '<p class="empty">Nothing matches these filters. Try “Reset all”, a shorter search, or another ranking profile.</p>';
+      : '<p class="empty">No colonies grew on this plate. Remove a filter or two (or press “Reset all”), shorten the search, or try another ranking.</p>';
     const more = $("#more");
     more.hidden = list.length <= S.shown;
     more.textContent = `Show more (${list.length - S.shown} more)`;
   }
-  function update() { S.shown = 40; writeURL(); renderFilters(); renderList(); }
+  function update() { S.shown = 40; writeURL(); renderFilters(); renderList(); markPreset(); }
 
   // ── tracker ─────────────────────────────────────────────────────────────
   const STATUS = [["saved", "Saved"], ["preparing", "Preparing"], ["applied", "Applied"], ["interview", "Interview"],
@@ -321,10 +390,10 @@
   }
   function trackCard(t) {
     const d = daysUntil(t.deadline);
-    const dl = t.deadline ? (d < 0 ? `Closed ${fmtDate(t.deadline)}` : `Closes ${fmtDate(t.deadline)} · ${d} days left`) : "No deadline set";
+    const dl = t.deadline ? (d < 0 ? `Closed ${fmtDate(t.deadline)}` : `Closes ${fmtDate(t.deadline)}, ${d} days left`) : "No deadline set";
     return `<article class="tcard" data-tid="${esc(t.id)}">
       <a href="${esc(t.url)}" target="_blank" rel="noopener"><b>${esc(t.title)}</b></a>
-      <p class="meta">${esc(t.org)}${t.org && t.location ? " · " : ""}${esc(t.location || "")}</p>
+      <p class="meta">${esc(t.org)}${t.org && t.location ? ", " : ""}${esc(t.location || "")}</p>
       <p class="dl ${d !== null && d < 0 ? "past" : d !== null && d <= 7 ? "urgent" : ""}">${esc(dl)}</p>
       <div class="row"><label>Status <select data-t="status">${STATUS.map(([k, l]) => `<option value="${k}"${t.status === k ? " selected" : ""}>${l}</option>`).join("")}</select></label>
         <label>Deadline <input type="date" data-t="deadline" value="${esc(t.deadline || "")}"></label></div>
@@ -343,13 +412,13 @@
     }).join("") : '<p class="empty">Nothing tracked yet. Press <b>☆ Track</b> on any position, or add one by hand below.</p>';
   }
   function ics() {
-    const out = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Lab Horizon//Applications//EN", "CALSCALE:GREGORIAN"];
+    const out = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//PetriPath//Applications//EN", "CALSCALE:GREGORIAN"];
     const stamp = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+/, "");
     const e = (s) => String(s || "").replace(/\\/g, "\\\\").replace(/[,;]/g, (c) => "\\" + c).replace(/\r?\n/g, "\\n");
     for (const t of Object.values(S.tracker)) {
       for (const [field, what] of [["deadline", "Deadline"], ["followup", "Follow up"]]) {
         if (!t[field]) continue;
-        out.push("BEGIN:VEVENT", `UID:${t.id}-${field}@lab-horizon`, `DTSTAMP:${stamp}`,
+        out.push("BEGIN:VEVENT", `UID:${t.id}-${field}@petripath`, `DTSTAMP:${stamp}`,
           `DTSTART;VALUE=DATE:${t[field].replace(/-/g, "")}`, `SUMMARY:${e(`${what}: ${t.title}${t.org ? " — " + t.org : ""}`)}`,
           `URL:${t.url || ""}`, `DESCRIPTION:${e(`Status: ${statusLabel(t.status)}${t.notes ? "\n" + t.notes : ""}`)}`, "END:VEVENT");
       }
@@ -362,8 +431,8 @@
   // ── fellowships ─────────────────────────────────────────────────────────
   function windowState(w) {
     const o = daysUntil(w.opens), d = daysUntil(w.deadline);
-    if (o !== null && o > 0) return ["upcoming", `opens ${fmtDate(w.opens)} (in ${o} days) · deadline ${fmtDate(w.deadline)}`];
-    if (d !== null && d >= 0) return ["open", `open now · closes ${fmtDate(w.deadline)} (${d} days left)`];
+    if (o !== null && o > 0) return ["upcoming", `opens ${fmtDate(w.opens)} (in ${o} days); deadline ${fmtDate(w.deadline)}`];
+    if (d !== null && d >= 0) return ["open", `open now, closes ${fmtDate(w.deadline)} (${d} days left)`];
     return ["closed", `closed ${fmtDate(w.deadline)}`];
   }
   function renderFellowships() {
@@ -375,7 +444,7 @@
       }).join("") || `<p class="window muted">Dates: see the official page${f.verified ? "" : " (link not yet checked)"}</p>`;
       const tracked = !!S.tracker["f-" + f.id];
       return `<article class="fcard"><h3><a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.name)}</a></h3>
-        <p class="meta">${esc(f.funder)} · ${esc(region[f.region] || f.region)}</p>${wins}
+        <p class="meta">${esc(f.funder)}, ${esc(region[f.region] || f.region)}</p>${wins}
         <p><b>Who:</b> ${esc(f.who)}</p><p><b>For Seshan:</b> ${esc(f.fit)}</p>
         <button class="btn ghost" data-act="track-f" data-fid="${esc(f.id)}">${tracked ? "★ Tracked" : "☆ Track"}</button></article>`;
     }).join("");
@@ -418,7 +487,7 @@
       ["IndiaBioscience jobs", "https://indiabioscience.org/jobs", "Indian institutes and companies"],
     ];
     $("#search").innerHTML = `<h2>Search elsewhere</h2>
-      <div class="note">LinkedIn and X do not allow automated collection and hide most posts behind a login, so Lab Horizon
+      <div class="note">LinkedIn and X do not allow automated collection and hide most posts behind a login, so PetriPath
       cannot read them for you. These buttons open ready-made searches instead. When you find something, add it to your
       tracker (Tracker tab) or open an “Add a position” issue on GitHub to put it on the site.</div>
       <h3>What</h3><div class="chips">${terms.map((t, i) => `<button data-term="${i}" aria-pressed="${t === term}">${esc(t)}</button>`).join("")}</div>
@@ -520,10 +589,15 @@
       const b = e.target.closest("button[data-tab]");
       if (b) showTab(b.dataset.tab);
     });
+    $("#discs").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-preset]");
+      if (b) applyPreset(b.dataset.preset);
+    });
     $("#profile").addEventListener("change", (e) => {
       S.profileId = e.target.value;
       rescore();
       renderHeader();
+      paintBackground();
       if (!$("#tune").hidden) renderTune();
       RENDER[S.tab]();
       writeURL();
@@ -551,6 +625,7 @@
     filters.addEventListener("change", (e) => {
       const el = e.target, key = el.dataset.f;
       if (!key) return;
+      S.preset = null;
       if (ARR.includes(key)) {
         const set = new Set(S.f[key]);
         if (el.checked) set.add(el.value); else set.delete(el.value);
@@ -564,7 +639,7 @@
       if (e.target.dataset.f === "min") { S.f.min = +e.target.value; $("#minout").textContent = e.target.value; renderList(); }
     });
     filters.addEventListener("click", (e) => {
-      if (e.target.closest("[data-act=reset]")) { S.f = JSON.parse(JSON.stringify(DEFAULTS)); S.q = ""; $("#q").value = ""; update(); return; }
+      if (e.target.closest("[data-act=reset]")) { S.f = JSON.parse(JSON.stringify(DEFAULTS)); S.q = ""; $("#q").value = ""; S.preset = null; update(); return; }
       const summary = e.target.closest("summary");
       if (summary && !e.target.closest("input")) {
         const f = summary.parentElement.dataset.field;
@@ -621,8 +696,8 @@
       e.target.reset();
       renderTracker();
     });
-    $("#ics").addEventListener("click", () => download("lab-horizon-deadlines.ics", ics(), "text/calendar"));
-    $("#export").addEventListener("click", () => download(`lab-horizon-tracker-${isoToday()}.json`,
+    $("#ics").addEventListener("click", () => download("petripath-deadlines.ics", ics(), "text/calendar"));
+    $("#export").addEventListener("click", () => download(`petripath-tracker-${isoToday()}.json`,
       JSON.stringify({ tracker: S.tracker, hidden: [...S.hidden], exported: new Date().toISOString() }, null, 1), "application/json"));
     $("#import").addEventListener("change", async (e) => {
       const file = e.target.files && e.target.files[0];
@@ -635,7 +710,7 @@
         saveTracker();
         renderTracker();
       } catch (err) {
-        alert("That file is not a Lab Horizon backup.");
+        alert("That file is not a PetriPath backup.");
       }
       e.target.value = "";
     });
@@ -649,7 +724,7 @@
 
   function noData(err) {
     $("#status").textContent = "";
-    $("#list").innerHTML = `<div class="note"><b>No data yet.</b> The daily GitHub Action writes <code>jobs.json</code>;
+    $("#list").innerHTML = `<div class="note"><b>No positions to show yet.</b> The daily GitHub Action writes <code>jobs.json</code>;
       the first run takes about ten minutes after GitHub Pages is switched on (see RUNBOOK.md).<br>
       To preview locally: <code>python scraper/scrape.py --offline</code>, then <code>python -m http.server -d docs</code>
       and open http://localhost:8000. <span class="muted">(${esc(err && err.message)})</span></div>`;
@@ -657,6 +732,7 @@
 
   async function init() {
     applyTheme(store.get("lh.theme", "auto"));
+    if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
     readURL();
     bind();
     $("#q").value = S.q;
@@ -679,10 +755,11 @@
     if (!S.profiles[S.profileId]) S.profileId = data.profiles.default;
     rescore();
     renderHeader();
+    paintBackground(true);
     updateTabCounts();
     showTab(S.tab);
     store.set("lh.lastVisit", new Date().toISOString());
-    window.LabHorizon = { state: S, rescore, renderList };          // handy in the browser console
+    window.PetriPath = { state: S, rescore, renderList };           // handy in the browser console
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

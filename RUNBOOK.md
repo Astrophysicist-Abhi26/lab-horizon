@@ -1,6 +1,7 @@
 # Runbook
 
-Day-to-day operation of Lab Horizon: first deployment, what runs when, and what to do when something breaks.
+Day-to-day operation of PetriPath: first deployment, what runs when, the Android app, and what to do when
+something breaks.
 
 ## 1. First deployment
 
@@ -8,7 +9,7 @@ Day-to-day operation of Lab Horizon: first deployment, what runs when, and what 
 cd lab-horizon
 git init -b main
 git add .
-git commit -m "Lab Horizon: postdoc and biology job radar for Seshan"
+git commit -m "PetriPath: postdoc and biology job radar for Seshan"
 git remote add origin https://github.com/Astrophysicist-Abhi26/lab-horizon.git   # create the empty repo on GitHub first
 git push -u origin main
 ```
@@ -117,3 +118,51 @@ Run `python scraper/doctor.py --show IMTECH`. When the titles and deadlines look
 | The tracker is empty on another device | the tracker lives in each browser's storage. Use *Export backup* and *Import backup* |
 | A position appears twice | different titles on two boards. De-duplication merges identical titles (same employer, or same country for long titles) |
 | An Indian post shows a wrong deadline | the notice page mixed several dates in one row. Open the PDF; add `include:` / `exclude:` rules if it repeats |
+
+## 10. The Android app
+
+**Build:** *Actions → Build Android app → Run workflow*.
+- The workflow downloads Gradle and builds `android/` with the runner's Android SDK.
+- The app opens `https://<owner>.github.io/<repository>/`, worked out from the repository's current name.
+- It publishes `PetriPath.apk` as a new release. `releases/latest/download/PetriPath.apk` (the site's **Android
+  app** button) always points to the newest build.
+- It also runs by itself when anything in `android/` changes.
+
+**Install on Seshan's phone:**
+1. Open the release link on the phone (or send the APK over WhatsApp) and tap `PetriPath.apk`.
+2. Android asks to allow installing apps from that source (Chrome, Files or WhatsApp). Allow it once, then tap
+   **Install**.
+3. Play Protect may say it doesn't recognise the app, because it isn't from the Play Store. Choose **Install
+   anyway**. The app only opens the site.
+
+**Updates:**
+- Site changes reach the app immediately; there is nothing to reinstall.
+- Rebuild only when `android/` changes or the repository is renamed. New builds install over the old one, because
+  every build is signed with the same key (`android/app/petripath.keystore`, password `petripath`).
+- That key is deliberately public: it only lets you update this sideloaded app, so never reuse it for a Play Store
+  app.
+
+**If the build fails:** open the failed run and send the red step's log. The usual causes are a Gradle or Android
+plugin version that GitHub's runner no longer supports. The fix is the version in `android/build.gradle` or the
+Gradle version in the workflow.
+
+## 11. Renaming the repository to `petripath`
+
+*Settings → General → Repository name.* Then:
+1. The site moves to `https://astrophysicist-abhi26.github.io/petripath/`. The old `/lab-horizon/` address stops
+   working, and GitHub does not redirect Pages.
+2. Run **Update positions and publish** once, so the new address has data straight away.
+3. Run **Build Android app**, so the app opens the new address.
+4. Locally: `git remote set-url origin https://github.com/Astrophysicist-Abhi26/petripath.git`.
+
+Nothing in the code depends on the name.
+
+## 12. Look and feel
+
+| Want to change … | where |
+|---|---|
+| colours (Gram-stain palette, both themes) | the variables at the top of `docs/style.css` |
+| fonts | the Google Fonts link in `docs/index.html` and `--font-display` / `--font-body` |
+| the background slide (motifs, formulas, density) | `MOTIFS`, `FORMULAS` and `cell` in `docs/bg.js` |
+| the avatar or icon | `tools/make_art.py`, then `python tools/make_art.py` |
+| the greeting or the quick-search discs | `greeting()` and `PRESETS` in `docs/app.js` |

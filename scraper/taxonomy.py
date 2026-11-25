@@ -6,6 +6,8 @@ expressions. A pattern starting with "!" is *strong*: one mention in the descrip
 is enough to tag the sub-field. A pattern starting with "~" is *generic* (words like
 "evolution", "AI", "Python", "surveillance" that also occur outside biology): it never
 tags a sub-field on its own, even in a title, but it counts towards the two-pattern rule.
+A pattern starting with "@" is read in the title only, and is strong there: a job titled
+"... Antimicrobial Research" is about antimicrobials, while the word inside a description may not be.
 Otherwise a sub-field is tagged when the title matches, or when two different patterns
 match the description.
 
@@ -38,13 +40,13 @@ _E = r"(?![\w-])"
 SUBFIELDS = {
     # ── Microbiology & infection ───────────────────────────────────────────
     "micro.amr": ("Antimicrobial resistance", [
-        r"!antimicrobial[- ]resistan\w*", r"!antibiotic[- ]resistan\w*", r"!\bAMR\b", r"!carbapenem\w*",
+        r"@\b(antimicrobials?|antibiotics?)\b", r"!antimicrobial[- ]resistan\w*", r"!antibiotic[- ]resistan\w*", r"!\bAMR\b", r"!carbapenem\w*",
         r"!colistin", r"!\bmcr-\d", r"!\bESBLs?\b", r"!(beta|β)-?lactamase\w*", r"!\b(NDM|KPC|OXA-48)\b",
-        r"!\bMRSA\b", r"!\bVRE\b", r"!multi-?drug[- ]resist\w*", r"!pan-?drug[- ]resist\w*",
-        r"!\b(MDR|XDR|PDR)\b", r"!resistome", r"!antimicrobial stewardship",
+        r"!\bMRSA\b", r"!\bVRE\b", r"multi-?drug[- ]resist\w*", r"pan-?drug[- ]resist\w*",
+        r"\b(MDR|XDR|PDR)\b", r"!resistome", r"!antimicrobial stewardship",
         r"!antimicrobial susceptibility", r"!minimum inhibitory concentration",
-        r"drug[- ]resistan\w*", r"resistance mechanism\w*", r"\bantibiotics?\b", r"\bantimicrobials?\b",
-        r"persister\w*", r"efflux pump\w*"]),
+        r"~drug[- ]resistan\w*", r"~resistance mechanism\w*", r"~\bantibiotics?\b", r"~\bantimicrobials?\b",
+        r"persister\w*", r"~efflux pump\w*"]),
     "micro.phage": ("Bacteriophages & phage therapy", [
         r"!bacteriophage\w*", r"!\bphages?\b", r"!phage therap\w*", r"!endolysin\w*", r"\blysins?\b"]),
     "micro.clinical": ("Clinical & diagnostic microbiology", [
@@ -85,8 +87,8 @@ SUBFIELDS = {
         r"\bmicroorganisms?\b"]),
     # ── Drug discovery ─────────────────────────────────────────────────────
     "drug.antiinfective": ("Anti-infective drug discovery", [
-        r"!antibiotic (discovery|development)", r"!antibacterial\w*", r"!anti-?infective\w*",
-        r"!antimicrobial (peptides?|drugs?|discovery|compounds?|agents?)",
+        r"@\b(antimicrobials?|antibiotics?)\b(?![- ]resist)", r"!antibiotic (discovery|development)", r"!antibacterial\w*", r"!anti-?infective\w*",
+        r"antimicrobial (peptides?|drugs?|discovery|compounds?|agents?)",
         r"!antifungal (discovery|drugs?|compounds?)", r"!antiviral (drugs?|discovery|compounds?)",
         r"natural products?", r"!\bMMV\b|Pathogen Box|Pandemic Response Box", r"\bhit compounds?\b"]),
     "drug.screening": ("Screening, assays & pharmacology", [
@@ -189,12 +191,20 @@ def field_of(node):
     return node.split(".", 1)[0]
 
 
+# Without one of their unmistakable terms (carbapenem, colistin, "antimicrobial resistance" …), these
+# sub-fields also need a microbial context: cancer "multidrug resistance" is not AMR.
+_MICROBIAL = re.compile(r"bacteri|microb|pathogen|infecti|antibiotic|fung|isolates?\b|nosocomial|gram[- ](negative|positive)|"
+                        r"klebsiella|pseudomonas|acinetobacter|e\. ?coli|salmonella|staphylococc|enterobacter|mycobacteri|tubercul",
+                        re.I)
+REQUIRES = {"micro.amr": _MICROBIAL, "drug.antiinfective": _MICROBIAL}
 CONTEXT_ONLY = {"genomics.aibio", "biotech.automation", "biotech.nano", "ops.qc", "ops.labops", "health.clinical"}
 COMPANY_CORE = {"ops.qc", "ops.labops", "biotech.automation"}   # core on a biology company's own board
 
 
 def _compile(pattern):
-    return pattern.startswith("!"), pattern.startswith("~"), re.compile(pattern.lstrip("!~"), re.I)
+    title_only = pattern.startswith("@")
+    return (pattern.startswith("!") or title_only, pattern.startswith("~"), title_only,
+            re.compile(pattern.lstrip("!~@"), re.I))
 
 
 COMPILED = {sid: [_compile(p) for p in pats] for sid, (_, pats) in SUBFIELDS.items()}
@@ -218,18 +228,27 @@ def tag(title, text):
     out = []
     for sid, pats in COMPILED.items():
         t_hits = d_hits = specific = 0
-        strong_hit = False
-        for strong, generic, rx in pats:
+        strong_hit = strong_any = False
+        for strong, generic, title_only, rx in pats:
+            if title_only:
+                if rx.search(title):
+                    t_hits += 1
+                    strong_any = True
+                continue
             if rx.search(title):
                 if generic:
                     d_hits += 1
                 else:
                     t_hits += 1
+                strong_any = strong_any or strong
             elif rx.search(text):
                 d_hits += 1
                 specific += not generic
                 strong_hit = strong_hit or strong
         if t_hits or strong_hit or (d_hits >= 2 and specific):
+            need = REQUIRES.get(sid)
+            if need and not (strong_any or strong_hit) and not need.search(title + " " + text):
+                continue
             out.append((sid, 3 * t_hits + d_hits))
     out.sort(key=lambda x: -x[1])
     return out

@@ -1,140 +1,144 @@
-# Lab Horizon
+<p align="center"><img src="docs/icon.svg" width="96" alt="PetriPath icon"></p>
 
-**Postdocs, fellowships and biology jobs — collected every day and ranked for Seshan Sivasankar.**
+# PetriPath
 
-A sibling of [Event Horizon 2.0](https://github.com/Astrophysicist-Abhi26/event-horizon-2.0), built the same way
-(one shared database, ranked per research profile, rebuilt every morning by GitHub Actions, published on
-GitHub Pages) but for **positions** instead of events. It is tailored to one microbiologist's CV:
-antimicrobial resistance, clinical and One Health microbiology, genome analysis of pathogens, compound
-screening, and years of hands-on wet-lab work.
+**Postdocs, fellowships and biology jobs, cultured fresh every morning for Dr Seshan Sivasankar.**
 
-**Site:** https://astrophysicist-abhi26.github.io/lab-horizon/ (live after the one-time setup below)
+The name is the idea: a Petri dish whose colonies grow into a path to his next lab. PetriPath is a sibling of
+[Event Horizon 2.0](https://github.com/Astrophysicist-Abhi26/event-horizon-2.0). Both keep one shared database,
+ranked per research profile, rebuilt every morning by GitHub Actions and published on GitHub Pages. PetriPath does
+this for **positions** instead of events, and it is tailored to one microbiologist's CV: antimicrobial resistance,
+clinical and One Health microbiology, genome analysis of pathogens, compound screening, and years of hands-on
+wet-lab work.
+
+**Site:** https://astrophysicist-abhi26.github.io/lab-horizon/ (or `/petripath/` after the optional rename below) ·
+**Android app:** the [latest release](../../releases/latest)
+
+## How it looks, and why
+
+- **Gram-stain colours.** The interface uses crystal violet. Safranin pink marks his Gram-negative world: wet-lab
+  roles and the strongest matches. Fluorescein green marks anything new, and antibiotic-disc amber marks
+  deadlines. The default background is a deep "darkfield" indigo; the light theme is a freshly stained slide.
+- **Seshan on a plate.** The hero shows an illustrated Seshan in his blue suit, pointing out of a MacConkey agar
+  plate. The plate has pink Klebsiella-like colonies, and meropenem, imipenem and ceftazidime discs with their
+  zones of inhibition. The colonies grow when the page opens.
+- **A new microscope slide on every visit.** Like Event Horizon's physics poster, the background redraws itself.
+  It uses line drawings from his own papers: Pseudomonas with its flagellum, encapsulated Klebsiella, phages,
+  mcr-1 and bla plasmid maps, Kirby–Bauer plates, the 96-well plates of his MMV screens, zebrafish larvae (the
+  carbon-quantum-dot paper), microalgae (his biofuel internship), DNA, PCR gels. It also shows real lab formulas
+  (Z′-factor, Wallace rule, Phred quality…) and a few twinkling quantum dots. The ranking profile picks which
+  fields appear most.
+- **Scores as zones of inhibition.** Each card's match score is a zone around an antibiotic disc: a bigger zone
+  means a better match.
+- Type is Bricolage Grotesque for headings and Atkinson Hyperlegible for long job lists. Motion stops for anyone
+  who asks their device for reduced motion.
 
 ## What it does
 
 - **Collects positions every day from 53 sources**, in Europe, India and worldwide:
-  - **Academic job boards:** EURAXESS (biological and medical sciences at postdoc level, plus AMR, microbiology,
-    infection biology, phage and One Health searches, plus its fellowship and funding offers), Nature Careers,
-    Science Careers, Times Higher Education, Chronicle, Inside Higher Ed, jobRxiv, the Max Planck Society,
-    jobs.ac.uk, Academic Positions, EuroScienceJobs and SciLifeLab.
+  - **Academic boards:**
+    - EURAXESS: biological and medical sciences at postdoc level; AMR, microbiology, infection-biology, phage
+      and One Health searches; and its fellowship offers.
+    - Nature Careers, Science Careers, Times Higher Education, Chronicle, Inside Higher Ed, jobRxiv, the Max
+      Planck Society, jobs.ac.uk, Academic Positions, EuroScienceJobs and SciLifeLab.
   - **India:** IndiaBioscience, Biotecnika, and the notice pages of NCBS, IISc and THSTI.
   - **30 companies, read through their official job-board APIs.** 19 of them are AI labs and
-    AI-first biology companies that run their own wet labs: Anthropic, Isomorphic Labs, Xaira, Biohub, Lila Sciences,
-    Adaptyv (Lausanne and London), Tabula Bio (AI-designed phage therapies), Latent Labs, Google DeepMind and others.
-    The rest are biotech, research foundations and pharma.
-  - **Positions added by hand** through an "Add a position" issue.
-- **Reads every posting** and labels it:
-  - which of 10 fields and 38 sub-fields it belongs to;
-  - position type (postdoc, fellowship, scientist, technician-level, faculty);
-  - wet lab / wet + dry / computational, and whether it is coding-heavy;
-  - seniority, and whether the advert offers or refuses visa sponsorship.
-  - It also compares the text with his research profile (`scraper/cv/seshan.txt`).
-- **Ranks** everything with Seshan's profile by default. 9 other profiles (microbiology, AI × biology
-  wet labs, molecular & cell biology, genomics, immunology, biotech industry, public health, plant & ecology, or
-  everything) re-rank the same list instantly. The **Tune** panel adjusts any profile with sliders.
-- **Filters and sorts** by field, region and country, sector, position type, lab type, deadline and posting date.
-  Quick picks hide coding-heavy roles, senior roles, technician-level roles, or roles that refuse visa sponsorship.
-  Every card has a **Why this score?** breakdown.
-- **Tracks applications**, kept only in the browser:
+    AI-first biology companies that run their own wet labs: Anthropic, Isomorphic Labs, Xaira, Biohub, Lila,
+    Adaptyv, Tabula Bio, Latent Labs, Google DeepMind and others.
+- **Reads every posting** and labels it: field (10 fields, 38 sub-fields), position
+  type, wet / wet + dry / computational, coding-heavy, seniority, and any visa line. It also compares the text
+  with his research profile.
+- **Ranks** with Seshan's profile by default. 9 other profiles re-rank the same list instantly, and
+  the **Tune** panel adjusts any of them with sliders. Every card has a **Why this score?** breakdown.
+- **Quick searches** on the hero, one tap each: AMR & infection, Europe wet labs, AI labs with wet benches, India,
+  closing soon, and new since the last visit. Full filters and sorting sit underneath.
+- **Tracker:**
   - stages Saved → Preparing → Applied → Interview → Offer;
-  - deadlines, follow-up dates, notes, and a document checklist;
-  - export of every deadline to a calendar (.ics), plus backup export and import.
-- **Fellowships tab:** 13 schemes he can apply for with a host lab (MSCA Postdoctoral Fellowships with the
-  checked 2027 dates, EMBO, HFSP, Humboldt, EMBL, FEMS, India Alliance, ANRF N-PDF, DBT-RA, ICMR, CSIR…), plus
-  live funding calls from EURAXESS.
-- **Search elsewhere:** one-click LinkedIn, Google Jobs, X, Bluesky and EURAXESS searches built from his profile.
-- **Daily digest:** new strong matches (and any source that broke) are posted as a comment on a GitHub issue.
-  Subscribe to that issue to get them by e-mail.
+  - deadlines, follow-ups, notes and a document checklist;
+  - deadlines exported to the phone's calendar.
+  - It is kept on the device only, with backup export and import.
+- **Fellowships:** 13 schemes, including the checked MSCA 2027 dates, plus live funding calls.
+- **Search elsewhere:** one-tap LinkedIn, Google Jobs, X, Bluesky and EURAXESS searches built from his profile
+  (LinkedIn and X cannot be collected automatically).
+- **Daily digest:** new strong matches are posted to a GitHub issue. Subscribe to it to get them by e-mail.
 
-## How Seshan's ranking works
+## The Android app
 
-Each position gets 0–100 for the selected profile. For Seshan's profile (`scraper/profiles.yaml`):
+`android/` is a small native app (`PetriPath.apk`) that opens the live site full-screen. Job adverts open in the
+phone's browser. The tracker is kept on the phone, and calendar exports go to Downloads. After one visit online,
+the last positions stay readable without a signal.
 
-- **Topic:** antimicrobial resistance 100; anti-infective drug discovery 95; clinical microbiology and microbial
-  genomics 90; pathogenesis, One Health and phage biology 85; other microbiology 70; epidemiology 70; molecular
-  biology 65; and so on down to ecology 10. A second field adds a quarter of its weight.
-- **Position and place:**
-  - postdoc +12, fellowship +10, scientist +8, technician-level −15;
-  - wet lab +10, computational −25, coding-heavy −20, senior −12;
-  - Europe +12, India +4, North America +3;
-  - visa support mentioned +4, sponsorship refused −35.
-- **His CV:** up to +20 for text similar to his research profile.
-- **Co-author network:** a small bonus for Amsterdam UMC, Münster and Tübingen, where (as far as we know) his
-  co-authors work. Edit the list freely.
-- **Optional Claude fit check:** ±10.
+GitHub builds it: **Actions → Build Android app → Run workflow**. About five minutes later, `PetriPath.apk`
+appears on the repository's **Releases** page, and the site's **Android app** button always points to the newest
+build. To install it, send Seshan the link or the file. He taps it on his phone and allows installing from his
+browser or WhatsApp when Android asks. Later builds install over the old one, and the tracker is kept.
 
-The total goes through a soft cap, so strong matches don't all tie at 100. The same formula runs in Python
-(`scraper/profiles.py`) and in the browser (`docs/score.js`); a test checks that they agree to the last point.
+On an iPhone (or without the APK), open the site in the browser and use **Add to Home Screen**: the site works as
+an installable web app too.
+
+## Set up (once)
+
+1. Push this folder to the `lab-horizon` repository (commands in [RUNBOOK.md](RUNBOOK.md)).
+2. *Settings → Pages → Source*: **GitHub Actions**.
+3. *Actions → Update positions and publish → Run workflow*. After this it runs every morning at 07:00 IST.
+4. *Actions → Build Android app → Run workflow* for the APK.
+5. Optional:
+   - **Rename the repository** to `petripath` (*Settings → General*). Do this before step 4, because the app
+     opens whatever address the repository has when it is built.
+   - **Add the secret** `ANTHROPIC_API_KEY` for Claude's one-line fit notes.
+   - **Subscribe** to the *digest* issue.
 
 ## What it cannot do
 
-- **LinkedIn and X** forbid automated collection and hide most posts behind a login, so they are not scraped.
-  The *Search elsewhere* tab opens ready-made searches instead. Anything found there can be added to the tracker,
-  or put on the site with an **Add a position** issue.
-- **Labels are keyword-based**, so read the original advert before applying. Add an Anthropic API key and Claude
-  will also read the best matches and write a one-line fit note for each.
-- **31 sources were confirmed live in November 2026, 6 partly, and
-  16 follow a site's usual pattern but were not tested.** They are mostly big-pharma Workday sites
-  and well-known company boards. If one fails, the **Sources** tab shows it in amber and
-  `python scraper/doctor.py --probe <name>` finds the right board.
-- It reads public pages only, respects every site's `robots.txt`, and asks each host at most once a second.
-
-## Set up (once, about 10 minutes)
-
-1. **Create a public repository** on GitHub named `lab-horizon`, then push this folder to it (commands in
-   [RUNBOOK.md](RUNBOOK.md)).
-2. **Turn on Pages:** go to *Settings → Pages* and set *Source* to **GitHub Actions**.
-3. **Run it once:** on the *Actions* tab, open **Update positions and publish** and click **Run workflow**. The run
-   takes about 10–15 minutes. After that it runs every morning at 07:00 IST.
-4. **Optional:** add a repository secret `ANTHROPIC_API_KEY` (*Settings → Secrets and variables → Actions*) to turn
-   on the Claude fit check. It reads at most 40 new postings a day, each only once.
-5. **Optional:** after the first scheduled run, open the issue labelled **digest** and click *Subscribe*. Seshan can
-   do the same with his GitHub account.
+- **LinkedIn and X** forbid automated collection, so their posts are not collected. Use *Search elsewhere*, then
+  add finds to the tracker or with an **Add a position** issue.
+- **Labels come from keywords,** so read the original advert before applying.
+- **Not every source is confirmed yet:** 31 sources were confirmed live in November 2026,
+  6 partly, and 16 follow a site's usual pattern. Anything failing shows
+  amber on the **Sources** tab, and `python scraper/doctor.py` helps fix it.
+- It reads public pages only, respects `robots.txt`, and asks each host at most once a second.
 
 ## Run it on your computer
 
 ```bash
 pip install -r requirements.txt
-python scraper/scrape.py --offline            # no network: builds docs/jobs.json from the test fixtures
-python -m http.server -d docs 8000            # then open http://localhost:8000
-python scraper/scrape.py                      # the real thing (5–15 minutes)
-python scraper/doctor.py --show EURAXESS      # test one source live and print what it finds
+python scraper/scrape.py --offline         # no network: builds docs/jobs.json from the test fixtures
+python -m http.server -d docs 8000         # then open http://localhost:8000
+python scraper/scrape.py                   # the real collection (5–15 minutes)
+python scraper/doctor.py --show EURAXESS   # test one source live
 ```
 
 ## Change things
 
 | To … | edit |
 |---|---|
-| add a job board or feed | `scraper/sources.yaml` |
-| add an institute notice page | `scraper/institutes.yaml` |
-| add a company (Greenhouse, Lever, Ashby, Workable, Workday) | `scraper/companies.yaml`, find its board with `doctor.py --probe` |
+| add a job board, feed, institute or company | `scraper/sources.yaml`, `institutes.yaml`, `companies.yaml` |
 | change what ranks first | `scraper/profiles.yaml` (or the **Tune** panel, per browser) |
 | update his research profile for the CV match | `scraper/cv/seshan.txt` |
 | add or update a fellowship | `scraper/fellowships.yaml` |
-| pin a position permanently | `scraper/watchlist.yaml`, or open an **Add a position** issue |
+| redraw the avatar or icon | `tools/make_art.py`, then `python tools/make_art.py` (needs `pip install resvg-py`) |
+| change colours, type or the background slide | `docs/style.css`, `docs/bg.js` |
 
-[SOURCES.md](SOURCES.md) lists every source with how it is read and how it was checked
-(`python scraper/doctor.py --markdown` regenerates it).
+[SOURCES.md](SOURCES.md) lists every source and how it was checked.
 
 ## Repository layout
 
 ```
-scraper/   scrape.py (daily pipeline) · sources_*.py (feeds, EURAXESS, web pages, company APIs, manual)
-           classify.py · taxonomy.py · geo.py · profiles.py · cvmatch.py · llm_fit.py · doctor.py · digest.py
-           *.yaml (sources, institutes, companies, profiles, fellowships, watchlist) · cv/seshan.txt
-docs/      the website: index.html · app.js · score.js · style.css   (jobs.json is written by the daily run)
-tests/     pytest suite on offline fixtures · ui/ui_smoke.js (clicks through the site in a headless DOM)
-.github/   daily update + deploy workflow · test workflow · "Add a position" and "Suggest a source" forms
+scraper/   daily pipeline (scrape.py), source readers, classifier, ranking, Claude fit check, doctor, digest
+docs/      the website: index.html · app.js · score.js · bg.js · style.css · sw.js · seshan.svg · icons
+android/   the Android app (built by .github/workflows/android.yml)
+tools/     make_art.py: redraws the avatar and icons
+tests/     pytest suite on offline fixtures · ui/ui_smoke.js clicks through the whole site
 ```
 
 ## Tests
 
-`python -m pytest -q tests` runs everything offline against saved copies of each source (`tests/fixtures`). It covers:
-- every parser;
-- the classifier and the ranking, including the browser/Python agreement;
-- the whole pipeline (de-duplication, expiry, carrying a broken source's postings forward) and every config file.
+`python -m pytest -q tests` runs offline against saved copies of every source. It covers:
+- the parsers;
+- the classifier, including the AMR false-positive guard;
+- the ranking, and that the browser computes the same scores as Python;
+- the full pipeline and the config files.
 
-The daily run stops before publishing if a test fails, so the live site keeps its last good data. Pull requests also
-run `tests/ui/ui_smoke.js`, which clicks through every tab of the site.
+The daily run publishes nothing if a test fails. Pull requests also run the site click-through.
 
-Built with Claude for Seshan Sivasankar · MIT licence
+Built for Seshan by his friend Abhishek · MIT licence

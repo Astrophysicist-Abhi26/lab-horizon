@@ -8,3 +8,8 @@ node_modules/
 docs/jobs.json
 notify/
 scraper/cache/*.json
+
+# Android build output
+android/.gradle/
+android/app/build/
+android/build/

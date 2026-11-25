@@ -1,4 +1,4 @@
-/* Lab Horizon — the ranking formula, shared by the site and the tests.
+/* PetriPath — the ranking formula, shared by the site and the tests.
    A line-for-line mirror of score() in scraper/profiles.py: tests/test_profiles.py runs
    both on the same postings and fails if a single score or reason differs. */
 (function (root) {

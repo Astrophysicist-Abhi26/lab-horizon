@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Lab Horizon — daily pipeline.
+PetriPath — daily pipeline.
 
   sources: feeds, EURAXESS, job-link boards, institute pages, company job boards,
            watchlist and "Add a position" issues
@@ -336,7 +336,7 @@ def payload(jobs, health, default_id, profiles, classifiers, sample=False):
         "generated": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "today": C.today().isoformat(),
         "sample": sample,
-        "site": {"title": "Lab Horizon", "for": "Seshan Sivasankar", "repo": C.REPO},
+        "site": {"title": "PetriPath", "for": "Seshan Sivasankar", "repo": C.REPO},
         "counts": {"jobs": len(jobs), "sources": len(health),
                    "sources_ok": sum(h["status"] in ("ok", "low") for h in health),
                    "by_region": dict(Counter(j["region"] for j in jobs))},
@@ -384,7 +384,7 @@ def notifications(jobs, health, default_id, notify_dir):
 
 # ---------------------------------------------------------------------------
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Collect, classify and rank positions for Lab Horizon.")
+    ap = argparse.ArgumentParser(description="Collect, classify and rank positions for PetriPath.")
     ap.add_argument("--only", help="run only sources whose name contains this text")
     ap.add_argument("--offline", action="store_true", help="read tests/fixtures instead of the internet")
     ap.add_argument("--out", default=OUT, help="where to write jobs.json (default docs/jobs.json)")
@@ -402,7 +402,7 @@ def main(argv=None):
     sources = build_sources()
     if a.only:
         sources = [s for s in sources if a.only.lower() in s.name.lower()]
-    print(f"Lab Horizon — {len(sources)} sources, today {C.today()}")
+    print(f"PetriPath — {len(sources)} sources, today {C.today()}")
 
     raw, health = run_sources(sources, prev.get("health"), a.workers)
     jobs = dedupe_ids([j for j in map(normalise, raw) if j])
